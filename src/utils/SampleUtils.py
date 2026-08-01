@@ -1,6 +1,5 @@
 import deepxde as dde
 
-
 class Sampler:
     def __init__(self, num_domain, num_boundary, num_test):
         self.num_domain = num_domain

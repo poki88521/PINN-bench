@@ -1,3 +1,4 @@
+version: "standard"
 example:
   name: "Helmholtz2D"
   a1: 2
