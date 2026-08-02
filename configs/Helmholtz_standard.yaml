@@ -6,9 +6,10 @@ example:
   k: 1.0
 training:
   lr: 0.001
-  iterations: 40
+  iterations: 100
   batch_size: 128
-sampler:
+  print_every: 10
+data:
   num_domain: 10000
   num_boundary: 1000
   num_test: 1000

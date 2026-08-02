@@ -1,5 +1,8 @@
 import deepxde as dde
+from sklearn.utils import deprecated
 
+
+@deprecated
 class Sampler:
     def __init__(self, num_domain, num_boundary, num_test):
         self.num_domain = num_domain
