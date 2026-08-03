@@ -4,6 +4,8 @@ class ExampleObject:
     def __init__(self):
         self.name = "ExampleObject"
         self.geom = None
+        self.time_domain = None
+        self.geomtime = None
         self.bcs = []
         self.ic = None
         self.exact_func = None

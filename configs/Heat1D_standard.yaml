@@ -1,14 +1,13 @@
 version: "standard"
 example:
-  name: "Helmholtz2D"
-  a1: 2
-  a2: 4
-  k: 1.0
+  name: "Heat1D"
+  alpha: 0.4
 training:
+  optimizer: "adam"
   lr: 0.001
   iterations: 100
   batch_size: 128
-  print_every: 10
+  display_every: 10
 data:
   num_domain: 10000
   num_boundary: 1000

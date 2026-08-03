@@ -1,0 +1,21 @@
+version: "standard"
+example:
+  name: "Helmholtz2D"
+  a1: 2
+  a2: 4
+  k: 1.0
+training:
+  optimizer: "adam"
+  lr: 0.001
+  iterations: 100
+  batch_size: 128
+  display_every: 10
+data:
+  num_domain: 10000
+  num_boundary: 1000
+  num_test: 1000
+dims:
+  in_dim: 2
+  depth: 5
+  width: 70
+  out_dim: 1
