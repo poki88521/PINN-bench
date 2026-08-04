@@ -1,7 +1,7 @@
 import deepxde as dde
 import numpy as np
 import torch
-from examples import ExampleObject
+from examples.ExampleObject import ExampleObject
 
 
 class Heat1D(ExampleObject):
@@ -11,9 +11,8 @@ class Heat1D(ExampleObject):
         self.geom = dde.geometry.Interval(0, 1)
         self.time_domain = dde.geometry.TimeDomain(0, 1)
         self.geomtime = dde.geometry.GeometryXTime(self.geom, self.time_domain)
-        self.bcs = [dde.DirichletBC(self.geom, self.u_exact_numpy,
-                                    lambda x, on_boundary: on_boundary)]
-        self.ic = dde.IC(self.geom, self.ic_func, lambda x, on_initial: on_initial)
+        self.bcs = [dde.DirichletBC(self.geomtime, lambda x: 0, lambda x, on_boundary: on_boundary)]
+        self.ic = dde.IC(self.geomtime, self.ic_func, lambda x, on_initial: on_initial)
         self.alpha = alpha
         pass
 

@@ -15,6 +15,7 @@ ENV/
 # Logs and databases
 *.log
 *.sqlite3
+dataset/
 
 # Local .env file
 .env

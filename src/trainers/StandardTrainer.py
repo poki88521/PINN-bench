@@ -1,8 +1,9 @@
 import time
 import os
-import numpy as np
+import csv
 from deepxde import Model
 import deepxde as dde
+from deepxde.model import TrainState
 from models import FeedForwardNet
 
 
@@ -29,8 +30,13 @@ def train(model : Model, training_config, model_path):
 
 
 def create_dataset(example, data_config):
-    data = example.get_data(data_config.num_domain, data_config.num_boundary, data_config.num_test)
+    if data_config.num_initial == 0:
+        data = example.get_data(data_config.num_domain, data_config.num_boundary, data_config.num_test)
+    else:
+        data = example.get_data(data_config.num_domain, data_config.num_boundary,
+                                data_config.num_initial, data_config.num_test)
     return data
+
 
 
 def create_model(data, dims_config):
@@ -38,10 +44,25 @@ def create_model(data, dims_config):
     return dde.Model(data, FeedForwardNet(dims))
 
 
-def test(example, model, data_config):
-    x_test = example.geom.uniform_points(n=data_config.num_test, boundary=True)
-    u_true = example.u_exact_numpy(x_test)
-    u_pred = model.predict(x_test)
-    error = np.linalg.norm(u_true - u_pred) / np.linalg.norm(u_true)
-    print(f"Relative L2 error: {error:.2e}")
+def save(loss_history, train_state : TrainState, history_path, training_config, info_path):
+    with open(history_path, 'w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(['iteration', 'train_loss', 'test_loss'])
+        #print(f"total num of loss:{len(loss_history.loss_train)}")
+        for i, (tr, te) in enumerate(zip(loss_history.loss_train, loss_history.loss_test)):
+            writer.writerow([i * training_config.display_every, tr, te])
+
+    with open(info_path, 'w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(['best_step', "best_loss_train", "best_loss_test"])
+        writer.writerow([train_state.best_step, train_state.best_loss_train, train_state.best_loss_test])
     pass
+
+
+def launch(config, example, example_dir, test_func):
+    version_dir, model_path, history_path, info_path = path_init(config, example_dir)
+    data = create_dataset(example, config.data)
+    model = create_model(data, config.dims)
+    loss_history, train_state, model = train(model, config.training, model_path)
+    test_func(example, model, config.data)
+    save(loss_history, train_state, history_path, config.training, info_path)

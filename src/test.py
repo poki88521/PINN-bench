@@ -1,11 +1,6 @@
 import os
-from utils import load_yaml
-from trainers import HelmholtzTrainer, HeatTrainer, WaveTrainer
+from examples import AllenCahn1D
 
-
-classes = {"Heat1D": HeatTrainer,
-           "Helmholtz2D": HelmholtzTrainer,
-           "Wave1D": WaveTrainer}
 
 def path_init(name, version):
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -21,9 +16,6 @@ def path_init(name, version):
     return config_path, example_dir, dataset_dir
 
 if __name__ == '__main__':
-    name = "Wave1D"
-    version = "standard"
-
-    config_path, example_dir, dataset_dir = path_init(name, version)
-    config = load_yaml(config_path)
-    classes[name].launch(config, example_dir, dataset_dir)
+    _, _, dataset_dir = path_init('AllenCahn1D', "standard")
+    example = AllenCahn1D(dataset_dir=dataset_dir)
+    example.load_data()

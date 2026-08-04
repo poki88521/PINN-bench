@@ -11,6 +11,7 @@ training:
 data:
   num_domain: 10000
   num_boundary: 1000
+  num_initial: 500
   num_test: 1000
 dims:
   in_dim: 2

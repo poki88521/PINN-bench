@@ -1,10 +1,10 @@
 import numpy as np
-from examples import Helmholtz2D
+from examples import Wave1D
 from trainers import StandardTrainer
 
 
 def test(example, model, data_config):
-    x_test = example.geom.uniform_points(n=data_config.num_test, boundary=True)
+    x_test = example.geomtime.uniform_points(n=data_config.num_test, boundary=True)
     u_true = example.u_exact_numpy(x_test)
     u_pred = model.predict(x_test)
     error = np.linalg.norm(u_true - u_pred) / np.linalg.norm(u_true)
@@ -12,7 +12,5 @@ def test(example, model, data_config):
     pass
 
 def launch(config, example_dir, dataset_dir):
-    example = Helmholtz2D(a1=config.example.a1, a2=config.example.a2, k=config.example.k)
+    example = Wave1D(config.example.c)
     StandardTrainer.launch(config, example, example_dir, test)
-
-
