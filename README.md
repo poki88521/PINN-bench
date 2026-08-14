@@ -19,23 +19,73 @@ a benchmark that incorporates multiple example for PINN bases on deepXDE and PyT
 ## 项目结构
 ```text
 PINN-Bench/
-├── configs/          # 算例配置文件
-├── runs/             # 训练输出（模型、日志、图片）
-├── dataset/          # 无解析解的算例的数据集
-├── src/
-│   ├── examples/     # 各个算例类（继承 BaseProblem）
-│   ├── models/       # 网络结构（FeedForwardNet 等）
-│   ├── trainers/     # 训练流程（HelmholtzTrainer 等）
-│   └── utils/        # 工具（配置加载、采样、绘图）
-├── requirements.txt
+├── configs/                # YAML配置（命名格式为{exmaple}_{version}.yaml）
+├── dataset/                # 算例数据集（无解析解时）
+├── runs/                   # 运行结果（不同版本的模型文件、历史记录等）
+|   ├── (example_name)/            
+|   │   ├── standard/       
+|   │   ├── (version_name)/             
+├── src/                    # 代码区
+│   ├── examples/           # 算例包（算例方程、边界条件等）
+│   ├── models/             # 模型包（FNN模型）
+│   ├── trainers/           # 训练包（完整训练流程）
+│   ├── utils/              # 工具包（YAML读取，绘图等）
+│   └── main.py             # 主程序
+├── examples.md             # 算例说明
 └── README.md
+```
+本项目中的模型、算例和训练器均已解耦，可以通过factory的方式进行拓展，详情见使用方法
+
+## 使用方法
+使用方法主要针对基础算例流程之外的修改方法
+1. 算例
+    - 算例方程中的参数等信息均可通过配置文件来进行修改（暂不支持复杂的边界条件与初始条件通过配置文件直接修改）
+2. 模型
+    - 网络大小可以通过修改配置文件直接修改
+    - 不同种类的模型可以通过在models文件夹额外添加文件来构建，并在model_factory.py文件中添加新的模型实例构建代码
+3. 训练
+    - 训练迭代次数、批量大小等数据均可通过配置文件直接修改（不会再显示于输出中）
+    - 和模型相同，不同类型的训练代码也可自定义文件并在trainer_factory.py中添加对应代码
+4. 配置文件模板
+```yaml
+version: (version_name)
+model_name: (model_name) #此处建议严格写模型类的名字，与model_factory中一致即可
+trainer_name: (trainer_name) #此处建议严格写模型类的名字，与trainer_factory中一致即可
+example:
+  name: (example_name) #此处需要严格写算例类的名字
+  a: 1.0 #仅为举例，此处写方程的参数（不包含边界条件、初始条件等）
+training:
+  optimizer: "adam" #要与deepXDE的优化器名称匹配
+  lr: 0.001
+  iterations: 100
+  batch_size: 128
+  display_every: 10 #在控制台打印信息的迭代数间隔
+data:
+  num_domain: 10000 #区域内采样点
+  num_boundary: 1000 #边界采样点
+  num_initial: 500 #初始采样点（稳态问题必须设置为0占位！）
+  num_test: 1000 #测试点数量
+dims: #网络结构，包含输入输出维度、深度和宽度
+  in_dim: 2
+  depth: 5
+  width: 70
+  out_dim: 1
 ```
 
 ## 注意事项
 - 对于方程输入的x，稳态情况下（如Helmholtz2D），x表示两个空间维度，瞬态情况下（如Heat1D），x表示时间和空间两个维度
+- 测试部分使用`geom.uniform_points()`生成均匀测试点而非`data.test_x`
+- 稳态问题**必须**在配置文件的`data.num_initial`栏目中设置0作为占位
+- 采样时采样数量会补全到二进制整数，可忽略
+- yaml读取到的字典已被工具打包为对象，可以通过调用对象中内容的方式来获取配置信息
 
 ## 待办事项
-- 从数据集中读取参考数据，并根据输入的数组来获取检测点
-- Burgers1D
-- 可供新网络、新训练方式进行拓展的接口（待设计）
+- 对照试验进行的接口（每运行一次非standard版本代码自动运行一次standard版本作为对照组）
 - 保存最优模型（可选，可以近似认为最后的模型就是最优模型）
+- 设置存档点（可选，目前可以认为训练流程都较短因此不设置中断存档）
+- 图表制作功能（绘制损失曲线等）
+
+
+
+
+

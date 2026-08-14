@@ -2,8 +2,7 @@ version: "standard"
 model_name: "FNN"
 trainer_name: "StandardTrainer"
 example:
-  name: "AllenCahn1D"
-  d: 0.001
+  name: "burgers1D"
 training:
   optimizer: "adam"
   lr: 0.001

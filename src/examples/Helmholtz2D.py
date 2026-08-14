@@ -5,15 +5,15 @@ from examples.ExampleObject import ExampleObject
 
 
 class Helmholtz2D(ExampleObject):
-    def __init__(self, a1=2, a2=4, k=1.0):
+    def __init__(self, dataset_dir, example_config):
         super().__init__()
         self.name = "Helmholtz2D"
         self.geom = dde.geometry.Rectangle([-1, -1], [1, 1])
         self.bcs = [dde.DirichletBC(self.geom, self.u_exact_numpy, lambda _, on_boundary: on_boundary)]
         self.exact_func = self.u_exact_numpy
-        self.a1 = a1
-        self.a2 = a2
-        self.k = k
+        self.a1 = example_config.a1
+        self.a2 = example_config.a2
+        self.k = example_config.k
 
     def pde(self, x, u):
         # x: [N, 2]

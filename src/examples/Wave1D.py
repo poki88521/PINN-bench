@@ -5,7 +5,7 @@ from examples.ExampleObject import ExampleObject
 
 
 class Wave1D(ExampleObject):
-    def __init__(self, c=1):
+    def __init__(self, dataset_dir, example_config):
         super().__init__()
         self.name = "Wave1D"
         self.geom = dde.geometry.Interval(0, 1)
@@ -18,7 +18,7 @@ class Wave1D(ExampleObject):
         self.ics = [dde.IC(self.geomtime, self.ic_u, lambda _, on_initial: on_initial),
                     dde.OperatorBC(self.geomtime, self.ic_u_t, lambda x, _: np.isclose(x[1], 0))]
         self.exact_func = self.u_exact_numpy
-        self.c = c
+        self.c = example_config.c
 
     def pde(self, x, u):
         u_tt = dde.grad.hessian(u, x, component=0, i=1, j=1)

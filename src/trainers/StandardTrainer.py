@@ -1,10 +1,10 @@
 import time
 import os
+import numpy as np
 import csv
 from deepxde import Model
-import deepxde as dde
 from deepxde.model import TrainState
-from models import FeedForwardNet
+from models import create_model
 
 
 
@@ -37,11 +37,19 @@ def create_dataset(example, data_config):
                                 data_config.num_initial, data_config.num_test)
     return data
 
-
-
-def create_model(data, dims_config):
-    dims = [dims_config.in_dim] + [dims_config.width] * dims_config.depth + [dims_config.out_dim]
-    return dde.Model(data, FeedForwardNet(dims))
+def test(example, model, data_config):
+    if example.time_domain is None:
+        x_test = example.geom.uniform_points(n=data_config.num_test, boundary=True)
+    else:
+        x_test = example.geomtime.uniform_points(n=data_config.num_test, boundary=True)
+    if example.exact_func is None:
+        u_true = example.load_data(x_test)
+    else:
+        u_true = example.u_exact_numpy(x_test)
+    u_pred = model.predict(x_test)
+    error = np.linalg.norm(u_true - u_pred) / np.linalg.norm(u_true)
+    print(f"Relative L2 error: {error:.2e}")
+    pass
 
 
 def save(loss_history, train_state : TrainState, history_path, training_config, info_path):
@@ -59,10 +67,10 @@ def save(loss_history, train_state : TrainState, history_path, training_config, 
     pass
 
 
-def launch(config, example, example_dir, test_func):
+def launch(config, example, example_dir):
     version_dir, model_path, history_path, info_path = path_init(config, example_dir)
     data = create_dataset(example, config.data)
-    model = create_model(data, config.dims)
+    model = create_model(config.model_name, config.dims, data)
     loss_history, train_state, model = train(model, config.training, model_path)
-    test_func(example, model, config.data)
+    test(example, model, config.data)
     save(loss_history, train_state, history_path, config.training, info_path)

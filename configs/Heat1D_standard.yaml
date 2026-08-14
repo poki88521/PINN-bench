@@ -1,4 +1,6 @@
 version: "standard"
+model_name: "FNN"
+trainer_name: "StandardTrainer"
 example:
   name: "Heat1D"
   alpha: 0.4

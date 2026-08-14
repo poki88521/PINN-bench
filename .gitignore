@@ -11,6 +11,7 @@ ENV/
 # IDE settings
 .idea/
 .vscode/
+.continue/
 
 # Logs and databases
 *.log

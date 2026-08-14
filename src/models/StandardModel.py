@@ -3,9 +3,9 @@ import deepxde as dde
 from torch import nn
 import torchinfo
 
-class FeedForwardNet(dde.nn.pytorch.NN):
+class FNN(dde.nn.pytorch.NN):
     def __init__(self, dims):
-        super(FeedForwardNet, self).__init__()
+        super(FNN, self).__init__()
         self.dims = dims
         self.layers = self.create_layers(dims)
         self.activation = nn.Tanh()
@@ -28,6 +28,6 @@ class FeedForwardNet(dde.nn.pytorch.NN):
 
 if __name__ == '__main__':
     dims = [2] + 5 * [70] + [1]
-    model = FeedForwardNet(dims)
+    model = FNN(dims)
     torchinfo.summary(model, input_size=(1, 2))
 

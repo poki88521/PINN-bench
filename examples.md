@@ -1,9 +1,9 @@
 ## 算例简介
-具体训练参数( 如iterations, batch_size) 详见config中的YAML配置文件
+具体训练参数(如iterations, batch_size) 详见config中的YAML配置文件
 
 ---
 
-#### Helmholtz2D（二维亥姆霍兹方程）
+#### Helmholtz2D（二维Helmholtz方程）
 
 | 项目 | 内容 |
 | :--- | :--- |
@@ -50,7 +50,7 @@
 | **特别说明** | 需用 `dde.OperatorBC` 处理速度初始条件 $u_t(x,0)=0$ |
 
 
-#### Allen‑Cahn（一维艾伦‑卡恩方程）
+#### Allen‑Cahn（一维Allen‑Cahn方程）
 
 | 项目 | 内容 |
 | :--- | :--- |
