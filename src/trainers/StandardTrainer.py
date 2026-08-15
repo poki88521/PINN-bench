@@ -34,7 +34,7 @@ def create_dataset(example, data_config):
         data = example.get_data(data_config.num_domain, data_config.num_boundary, data_config.num_test)
     else:
         data = example.get_data(data_config.num_domain, data_config.num_boundary,
-                                data_config.num_initial, data_config.num_test)
+                                data_config.num_test, data_config.num_initial)
     return data
 
 def test(example, model, data_config):

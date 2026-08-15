@@ -20,8 +20,8 @@ class FNN(dde.nn.pytorch.NN):
 
     def forward(self, x):
         if not torch.is_tensor(x):
-            x = torch.as_tensor(x)
-        for i in range(len(self.layers) - 2):
+            x = torch.as_tensor(x, dtype=torch.get_default_dtype())
+        for i in range(len(self.layers) - 1):
             x = self.activation(self.layers[i](x))
         return self.layers[-1](x)
 

@@ -13,6 +13,7 @@ class Heat1D(ExampleObject):
         self.geomtime = dde.geometry.GeometryXTime(self.geom, self.time_domain)
         self.bcs = [dde.DirichletBC(self.geomtime, lambda x: 0, lambda x, on_boundary: on_boundary)]
         self.ics = [dde.IC(self.geomtime, self.ic_func, lambda x, on_initial: on_initial)]
+        self.exact_func = self.u_exact_numpy
         self.alpha = example_config.alpha
         pass
 
@@ -26,7 +27,7 @@ class Heat1D(ExampleObject):
 
     def u_exact_numpy(self, x):
         # x: [N, 2] (space = [:, 0], time = [:, 1])
-        return np.exp(- (np.pi ** 2) * self.alpha * x[:, 1]) * np.sin(np.pi * x[:, 0])
+        return np.exp(- (np.pi ** 2) * self.alpha * x[:, 1:2]) * np.sin(np.pi * x[:, 0:1])
 
     def u_exact_torch(self, x):
-        torch.exp(- torch.pi ** 2 * self.alpha * x[:, 1]) * torch.sin(torch.pi * x[:, 0])
+        return torch.exp(- torch.pi ** 2 * self.alpha * x[:, 1:2]) * torch.sin(torch.pi * x[:, 0:1])

@@ -1,7 +1,7 @@
 import os
 from examples import *
 from utils import load_yaml
-from trainers import StandardTrainer
+from trainers import StandardTrainer, trainer_factory
 
 classes = {"Heat1D": Heat1D,
            "Helmholtz2D": Helmholtz2D,
@@ -29,4 +29,4 @@ if __name__ == '__main__':
     config_path, example_dir, dataset_dir = path_init(name, version)
     config = load_yaml(config_path)
     example = classes[name](dataset_dir, config.example)
-    StandardTrainer.launch(config, example, example_dir)
+    trainer_factory.launch_trainer(config, example, example_dir)
