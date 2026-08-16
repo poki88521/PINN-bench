@@ -22,9 +22,9 @@ PINN-Bench/
 ├── configs/                # YAML配置（命名格式为{exmaple}_{version}.yaml）
 ├── dataset/                # 算例数据集（无解析解时）
 ├── runs/                   # 运行结果（不同版本的模型文件、历史记录等）
-|   ├── (example_name)/            
-|   │   ├── standard/       
-|   │   ├── (version_name)/             
+|   └── (example_name)/            
+|       ├── standard/       
+|       └── (version_name)/             
 ├── src/                    # 代码区
 │   ├── examples/           # 算例包（算例方程、边界条件等）
 │   ├── models/             # 模型包（FNN模型）
@@ -84,6 +84,7 @@ dims: #网络结构，包含输入输出维度、深度和宽度
 - 保存最优模型（可选，可以近似认为最后的模型就是最优模型）
 - 设置存档点（可选，目前可以认为训练流程都较短因此不设置中断存档）
 - 图表制作功能（绘制损失曲线等）
+- 有关本项目的环境配置方法
 
 
 

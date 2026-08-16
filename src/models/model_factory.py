@@ -6,4 +6,4 @@ def create_model(model_name, dims_config, data):
     if model_name == "FNN":
         return dde.Model(data, FNN(dims))
     else:
-        return None
+        raise ValueError("Unknown model")

@@ -5,7 +5,7 @@ import csv
 from deepxde import Model
 from deepxde.model import TrainState
 from models import create_model
-
+from utils import CSVUtils
 
 
 def path_init(config, example_dir):
@@ -52,18 +52,10 @@ def test(example, model, data_config):
     pass
 
 
-def save(loss_history, train_state : TrainState, history_path, training_config, info_path):
-    with open(history_path, 'w', newline='') as f:
-        writer = csv.writer(f)
-        writer.writerow(['iteration', 'train_loss', 'test_loss'])
-        #print(f"total num of loss:{len(loss_history.loss_train)}")
-        for i, (tr, te) in enumerate(zip(loss_history.loss_train, loss_history.loss_test)):
-            writer.writerow([i * training_config.display_every, tr, te])
-
-    with open(info_path, 'w', newline='') as f:
-        writer = csv.writer(f)
-        writer.writerow(['best_step', "best_loss_train", "best_loss_test"])
-        writer.writerow([train_state.best_step, train_state.best_loss_train, train_state.best_loss_test])
+def save(loss_history, train_state, history_path, training_config, info_path, example):
+    CSVUtils.history_writer(history_path, loss_history, training_config)
+    CSVUtils.info_writer(info_path, train_state)
+    CSVUtils.component_writer(history_path, loss_history, example)
     pass
 
 
@@ -73,4 +65,4 @@ def launch(config, example, example_dir):
     model = create_model(config.model_name, config.dims, data)
     loss_history, train_state, model = train(model, config.training, model_path)
     test(example, model, config.data)
-    save(loss_history, train_state, history_path, config.training, info_path)
+    save(loss_history, train_state, history_path, config.training, info_path, example)

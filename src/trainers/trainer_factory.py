@@ -7,4 +7,4 @@ def launch_trainer(config, example, example_dir):
     if trainer_name == "StandardTrainer":
         StandardTrainer.launch(config, example, example_dir)
     else:
-        pass
+        raise ValueError("Unknown trainer")

@@ -1,4 +1,9 @@
+# launcher of agent
 agent.bat
+
+# test scratch
+scratch/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -13,6 +18,7 @@ ENV/
 .idea/
 .vscode/
 .continue/
+.obsidian/
 
 # Logs and databases
 *.log
