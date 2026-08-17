@@ -3,6 +3,7 @@ agent.bat
 
 # test scratch
 scratch/
+material/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -73,14 +73,20 @@ dims: #网络结构，包含输入输出维度、深度和宽度
 ```
 
 ## 注意事项
+- 项目理论基础均来自论文[1]，拓展示例来自[2]
 - 对于方程输入的x，稳态情况下（如Helmholtz2D），x表示两个空间维度，瞬态情况下（如Heat1D），x表示时间和空间两个维度
 - 测试部分使用`geom.uniform_points()`生成均匀测试点而非`data.test_x`
 - 稳态问题**必须**在配置文件的`data.num_initial`栏目中设置0作为占位
 - 采样时采样数量会补全到二进制整数，可忽略
 - yaml读取到的字典已被工具打包为对象，可以通过调用对象中内容的方式来获取配置信息
 
+## 论文引用
+[1] Raissi, M., Perdikaris, P., Karniadakis, G.E., 2019. Physics-informed neural networks: A deep learning framework for solving forward and inverse problems involving nonlinear partial differential equations. Journal of Computational Physics 378, 686–707. https://doi.org/10.1016/j.jcp.2018.10.045
+[2] Niu, P., Guo, J., Chen, Y., Zhou, Y., Feng, M., Shi, Y., 2025. Improved physics-informed neural network in mitigating gradient-related failures. Neurocomputing 638, 130167. https://doi.org/10.1016/j.neucom.2025.130167
+
+
 ## 待办事项
-- 对照试验进行的接口（每运行一次非standard版本代码自动运行一次standard版本作为对照组）
+- ~~对照试验进行的接口（每运行一次非standard版本代码自动运行一次standard版本作为对照组）~~修改为将I-PINN（Niu P, 2025）作为拓展模块的例子
 - 保存最优模型（可选，可以近似认为最后的模型就是最优模型）
 - 设置存档点（可选，目前可以认为训练流程都较短因此不设置中断存档）
 - 图表制作功能（绘制损失曲线等）

@@ -1,9 +1,7 @@
 import time
 import os
 import numpy as np
-import csv
 from deepxde import Model
-from deepxde.model import TrainState
 from models import create_model
 from utils import CSVUtils
 
