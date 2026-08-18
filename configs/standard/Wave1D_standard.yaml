@@ -1,22 +1,28 @@
-version: "ipinn"
-model_name: "AttentionNet"
-trainer_name: "ImprovedTrainer"
+version: "standard"
+
 example:
-  name: "Helmholtz2D"
-  a1: 2
-  a2: 4
-  k: 1.0
+  name: "Wave1D"
+  c: 1
+
+model:
+  model_name: "FNN"
+  activation: "tanh"
+  init: "Glorot normal"
+
 training:
+  trainer_name: "StandardTrainer"
   optimizer: "adam"
   lr: 0.001
   iterations: 100
   batch_size: 128
   display_every: 10
+
 data:
   num_domain: 10000
   num_boundary: 1000
-  num_initial: 0
+  num_initial: 500
   num_test: 1000
+
 dims:
   in_dim: 2
   depth: 5

@@ -60,7 +60,7 @@ def save(loss_history, train_state, history_path, training_config, info_path, ex
 def launch(config, example, example_dir):
     version_dir, model_path, history_path, info_path = path_init(config, example_dir)
     data = create_dataset(example, config.data)
-    model = create_model(config.model_name, config.dims, data)
+    model = create_model(config, data)
     loss_history, train_state, model = train(model, config.training, model_path)
     test(example, model, config.data)
     save(loss_history, train_state, history_path, config.training, info_path, example)

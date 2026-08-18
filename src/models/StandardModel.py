@@ -1,20 +1,23 @@
 import torch
 import deepxde as dde
+from deepxde.nn import activations, initializers
 from torch import nn
 import torchinfo
 
 class FNN(dde.nn.pytorch.NN):
-    def __init__(self, dims):
+    def __init__(self, dims, model_config):
         super(FNN, self).__init__()
         self.dims = dims
-        self.layers = self.create_layers(dims)
-        self.activation = nn.Tanh()
+        self.layers = self.create_layers(dims, model_config.init)
+        self.activation = activations.get(model_config.activation)
 
-    def create_layers(self, dims):
+    def create_layers(self, dims, model_config):
         layers = []
         for i in range(len(dims) - 1):
             layers.append(nn.Linear(dims[i], dims[i + 1]))
-            nn.init.xavier_normal_(layers[i].weight.data, gain=nn.init.calculate_gain('tanh'))
+            #把config变成初始化函数并调用（参考torch和deepxde的字典）
+            initializers.get(model_config.init)(layers[i].weight.data,
+                                                gain=nn.init.calculate_gain(model_config.activation))
             nn.init.zeros_(layers[i].bias.data)
         return nn.ModuleList(layers)
 
@@ -29,6 +32,7 @@ class FNN(dde.nn.pytorch.NN):
             x = self.activation(self.layers[i](x))
         return self.layers[-1](x)
 
+activations
 
 if __name__ == '__main__':
     dims = [2] + 5 * [70] + [1]

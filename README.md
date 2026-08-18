@@ -2,6 +2,7 @@
 a benchmark that incorporates multiple example for PINN bases on deepXDE and PyTorch
 
 ## 功能
+- 可以PINN改进的验证工具，为拓展和改进网络结构、训练流程、损失函数提供接口（详见使用方法）
 - 包含以下算例且可以通过.yaml的配置文件来修改超参数：
     + 一维热传导方程（Heat1D）
     + 一维波动方程（Wave1D）
@@ -9,6 +10,7 @@ a benchmark that incorporates multiple example for PINN bases on deepXDE and PyT
     + 一维Burgers方程（Burgers1D）
     + 二维Helmholtz方程（Helmholtz2D）
 - 自动训练、打印、保存数据、制作评估图表
+- 包含I-PINN为理论基础的改进结构代码（论文[2]）
 
 ## 算例简介
 见examples.md
@@ -74,6 +76,27 @@ dims: #网络结构，包含输入输出维度、深度和宽度
 
 ## 注意事项
 - 项目理论基础均来自论文[1]，拓展示例来自[2]
+- 配置文件中的初始化名和激活函数名必须严格按照以下字典（来自deepxde和torch的代码）中的名字来设置（否则会读取不出来！）
+```python
+initializer_dict = {
+  "Glorot normal": torch.nn.init.xavier_normal_,
+  "Glorot uniform": torch.nn.init.xavier_uniform_,
+  "He normal": torch.nn.init.kaiming_normal_,
+  "He uniform": torch.nn.init.kaiming_uniform_,
+  "zeros": torch.nn.init.zeros_,
+}
+activation_dict = {
+"elu": bkd.elu,
+"gelu": bkd.gelu,
+"relu": bkd.relu,
+"selu": bkd.selu,
+"sigmoid": bkd.sigmoid,
+"silu": bkd.silu,
+"sin": bkd.sin,
+"swish": bkd.silu,
+"tanh": bkd.tanh,
+}
+```
 - 对于方程输入的x，稳态情况下（如Helmholtz2D），x表示两个空间维度，瞬态情况下（如Heat1D），x表示时间和空间两个维度
 - 测试部分使用`geom.uniform_points()`生成均匀测试点而非`data.test_x`
 - 稳态问题**必须**在配置文件的`data.num_initial`栏目中设置0作为占位

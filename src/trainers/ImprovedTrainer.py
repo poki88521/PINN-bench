@@ -27,8 +27,10 @@ def _make_aw_loss(sigma, gamma, log_scale):
     return loss_fn
 
 
-def train(model: Model, training_config, model_path, example):
-    gamma = 1000.0
+def train(model: Model, config, model_path, example):
+    training_config = config.training
+    ipinn_config = training_config.ipinn
+    gamma = ipinn_config.gamma
     sigma_pde = dde.Variable(1.0)
     sigma_bc = dde.Variable(1.0)
     sigma_ic = dde.Variable(1.0)
@@ -48,11 +50,9 @@ def train(model: Model, training_config, model_path, example):
     if n_ic:
         external_vars.append(sigma_ic)
 
-    lr_decay_step = getattr(training_config, "lr_decay_step", 1000)
-    lr_decay_gamma = getattr(training_config, "lr_decay_gamma", 0.9)
-
     model.compile(training_config.optimizer, lr=training_config.lr,
-                  decay=("step", lr_decay_step, lr_decay_gamma), loss=losses,
+                  decay=("step", training_config.lr_dacay_step, training_config.lr_decay_gamma),
+                  loss=losses,
                   external_trainable_variables=external_vars)
     time_start = time.time()
     loss_history, train_state = model.train(iterations=training_config.iterations,
@@ -67,9 +67,9 @@ def train(model: Model, training_config, model_path, example):
 def launch(config, example, example_dir):
     version_dir, model_path, history_path, info_path = StandardTrainer.path_init(config, example_dir)
     data = StandardTrainer.create_dataset(example, config.data)
-    model = create_model(config.model_name, config.dims, data)
+    model = create_model(config, data)
 
-    mu, sigma = compute_normalization(example)
+    mu, sigma = compute_normalization(example, config.ipinn.n_samples)
     net = model.net
     net.register_buffer("norm_mu", torch.as_tensor(np.asarray(mu, dtype=np.float32),
                                                    dtype=torch.get_default_dtype()))
@@ -80,6 +80,6 @@ def launch(config, example, example_dir):
         return (x - net.norm_mu) / net.norm_sigma
 
     net.apply_feature_transform(normalize)
-    loss_history, train_state, model = train(model, config.training, model_path, example)
+    loss_history, train_state, model = train(model, config, model_path, example)
     StandardTrainer.test(example, model, config.data)
     StandardTrainer.save(loss_history, train_state, history_path, config.training, info_path, example)

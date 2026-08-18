@@ -1,22 +1,36 @@
-version: "standard"
-model_name: "FNN"
-trainer_name: "StandardTrainer"
+version: "ipinn"
+
 example:
-  name: "AllenCahn1D"
-  d: 0.001
+  name: "Helmholtz2D"
+  a1: 2
+  a2: 4
+  k: 1.0
+
+model:
+  model_name: "FNN"
+  activation: "tanh"
+  init: "Glorot normal"
+
 training:
+  trainer_name: "StandardTrainer"
   optimizer: "adam"
   lr: 0.001
   iterations: 100
   batch_size: 128
   display_every: 10
+
 data:
   num_domain: 10000
   num_boundary: 1000
   num_initial: 500
   num_test: 1000
+
 dims:
   in_dim: 2
   depth: 5
   width: 70
   out_dim: 1
+
+ipinn:
+  gamma: 1000.0
+  n_samples: 100000
