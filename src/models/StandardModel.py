@@ -19,8 +19,12 @@ class FNN(dde.nn.pytorch.NN):
         return nn.ModuleList(layers)
 
     def forward(self, x):
+        #格式校验
         if not torch.is_tensor(x):
             x = torch.as_tensor(x, dtype=torch.get_default_dtype())
+        #归一化
+        if self._input_transform is not None:
+            x = self._input_transform(x)
         for i in range(len(self.layers) - 1):
             x = self.activation(self.layers[i](x))
         return self.layers[-1](x)
@@ -30,4 +34,3 @@ if __name__ == '__main__':
     dims = [2] + 5 * [70] + [1]
     model = FNN(dims)
     torchinfo.summary(model, input_size=(1, 2))
-

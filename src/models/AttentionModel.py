@@ -13,8 +13,12 @@ class AttentionNet(FNN):
         nn.init.zeros_(self.attentions[1].bias.data)
 
     def forward(self, x):
+        #格式校验
         if not torch.is_tensor(x):
             x = torch.as_tensor(x, dtype=torch.get_default_dtype())
+        #归一化
+        if self._input_transform is not None:
+            x = self._input_transform(x)
         encoders = [self.activation(self.attentions[0](x)), self.activation(self.attentions[1](x))]
         a = self.activation(self.layers[0](x))
         a = a * encoders[0] + (1 - a) * encoders[1]

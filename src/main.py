@@ -11,8 +11,8 @@ CLASSES = {"Heat1D": Heat1D,
 
 
 if __name__ == '__main__':
-    name = "Helmholtz2D"
-    version = "standard"
+    name = "AllenCahn1D"
+    version = "ipinn"
 
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     config_path, example_dir, dataset_dir = path_init(BASE_DIR, name, version)
