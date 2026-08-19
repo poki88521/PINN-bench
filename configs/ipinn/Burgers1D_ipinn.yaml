@@ -1,10 +1,7 @@
 version: "ipinn"
 
 example:
-  name: "Helmholtz2D"
-  a1: 2
-  a2: 4
-  k: 1.0
+  name: "Burgers1D"
 
 model:
   model_name: "AttentionNet"
@@ -24,7 +21,7 @@ training:
 data:
   num_domain: 10000
   num_boundary: 1000
-  num_initial: 0
+  num_initial: 500
   num_test: 1000
 
 dims:

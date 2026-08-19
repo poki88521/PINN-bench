@@ -8,7 +8,7 @@ class FNN(dde.nn.pytorch.NN):
     def __init__(self, dims, model_config):
         super(FNN, self).__init__()
         self.dims = dims
-        self.layers = self.create_layers(dims, model_config.init)
+        self.layers = self.create_layers(dims, model_config)
         self.activation = activations.get(model_config.activation)
 
     def create_layers(self, dims, model_config):
@@ -16,8 +16,7 @@ class FNN(dde.nn.pytorch.NN):
         for i in range(len(dims) - 1):
             layers.append(nn.Linear(dims[i], dims[i + 1]))
             #把config变成初始化函数并调用（参考torch和deepxde的字典）
-            initializers.get(model_config.init)(layers[i].weight.data,
-                                                gain=nn.init.calculate_gain(model_config.activation))
+            initializers.get(model_config.init)(layers[i].weight.data)
             nn.init.zeros_(layers[i].bias.data)
         return nn.ModuleList(layers)
 
@@ -32,9 +31,9 @@ class FNN(dde.nn.pytorch.NN):
             x = self.activation(self.layers[i](x))
         return self.layers[-1](x)
 
-activations
 
 if __name__ == '__main__':
-    dims = [2] + 5 * [70] + [1]
-    model = FNN(dims)
-    torchinfo.summary(model, input_size=(1, 2))
+    #dims = [2] + 5 * [70] + [1]
+    #model = FNN(dims, config)
+    #torchinfo.summary(model, input_size=(1, 2))
+    ...

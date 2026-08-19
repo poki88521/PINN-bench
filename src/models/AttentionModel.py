@@ -1,16 +1,19 @@
 from models import FNN
+from deepxde.nn import initializers
 from torch import nn
 import torchinfo
 import torch
 
 class AttentionNet(FNN):
-    def __init__(self, dims):
-        super(AttentionNet, self).__init__(dims)
+    def __init__(self, dims, model_config):
+        super(AttentionNet, self).__init__(dims, model_config)
         self.attentions = nn.ModuleList([nn.Linear(dims[0], dims[1]), nn.Linear(dims[0], dims[1])])
-        nn.init.xavier_normal_(self.attentions[0].weight.data, gain=nn.init.calculate_gain('tanh'))
+        # 把config变成初始化函数并调用（参考torch和deepxde的字典）
+        initializers.get(model_config.init)(self.attentions[0].weight.data)
         nn.init.zeros_(self.attentions[0].bias.data)
-        nn.init.xavier_normal_(self.attentions[1].weight.data, gain=nn.init.calculate_gain('tanh'))
+        initializers.get(model_config.init)(self.attentions[1].weight.data)
         nn.init.zeros_(self.attentions[1].bias.data)
+
 
     def forward(self, x):
         #格式校验
@@ -29,6 +32,7 @@ class AttentionNet(FNN):
 
 
 if __name__ == '__main__':
-    dims = [2] + 5 * [70] + [1]
-    model_attention = AttentionNet(dims)
-    torchinfo.summary(model_attention, input_size=(1, 2))
+    #dims = [2] + 5 * [70] + [1]
+    #model_attention = AttentionNet(dims)
+    #torchinfo.summary(model_attention, input_size=(1, 2))
+    ...

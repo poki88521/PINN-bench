@@ -1,45 +1,45 @@
 step,split,component,loss
-0,train,PDE,8.830162e+03
-0,train,BC(exact u on boundary),1.523322e+00
-0,test,PDE,1.032204e+04
-0,test,BC(exact u on boundary),1.523322e+00
-10,train,PDE,8.214093e+03
-10,train,BC(exact u on boundary),1.701361e+00
-10,test,PDE,9.598143e+03
-10,test,BC(exact u on boundary),1.701361e+00
-20,train,PDE,7.610813e+03
-20,train,BC(exact u on boundary),2.304657e+00
-20,test,PDE,8.815254e+03
-20,test,BC(exact u on boundary),2.304657e+00
-30,train,PDE,6.912141e+03
-30,train,BC(exact u on boundary),3.298534e+00
-30,test,PDE,7.898771e+03
-30,test,BC(exact u on boundary),3.298534e+00
-40,train,PDE,6.108367e+03
-40,train,BC(exact u on boundary),3.842213e+00
-40,test,PDE,6.809879e+03
-40,test,BC(exact u on boundary),3.842213e+00
-50,train,PDE,5.253008e+03
-50,train,BC(exact u on boundary),4.295662e+00
-50,test,PDE,5.715874e+03
-50,test,BC(exact u on boundary),4.295662e+00
-60,train,PDE,4.420997e+03
-60,train,BC(exact u on boundary),4.718689e+00
-60,test,PDE,4.706953e+03
-60,test,BC(exact u on boundary),4.718689e+00
-70,train,PDE,3.698433e+03
-70,train,BC(exact u on boundary),5.047492e+00
-70,test,PDE,3.928729e+03
-70,test,BC(exact u on boundary),5.047492e+00
-80,train,PDE,3.018831e+03
-80,train,BC(exact u on boundary),5.569808e+00
-80,test,PDE,3.218350e+03
-80,test,BC(exact u on boundary),5.569808e+00
-90,train,PDE,2.457942e+03
-90,train,BC(exact u on boundary),6.173594e+00
-90,test,PDE,2.616306e+03
-90,test,BC(exact u on boundary),6.173594e+00
-100,train,PDE,1.922393e+03
-100,train,BC(exact u on boundary),6.181247e+00
-100,test,PDE,2.057352e+03
-100,test,BC(exact u on boundary),6.181247e+00
+0,train,PDE,8.758323e+03
+0,train,BC(exact u on boundary),3.571669e-01
+0,test,PDE,1.024464e+04
+0,test,BC(exact u on boundary),3.571669e-01
+10,train,PDE,8.578816e+03
+10,train,BC(exact u on boundary),1.296246e-01
+10,test,PDE,1.003510e+04
+10,test,BC(exact u on boundary),1.296246e-01
+20,train,PDE,8.399683e+03
+20,train,BC(exact u on boundary),9.120205e-02
+20,test,PDE,9.825798e+03
+20,test,BC(exact u on boundary),9.120205e-02
+30,train,PDE,8.204384e+03
+30,train,BC(exact u on boundary),1.874422e-01
+30,test,PDE,9.596993e+03
+30,test,BC(exact u on boundary),1.874422e-01
+40,train,PDE,7.951570e+03
+40,train,BC(exact u on boundary),7.909781e-01
+40,test,PDE,9.289792e+03
+40,test,BC(exact u on boundary),7.909781e-01
+50,train,PDE,7.617735e+03
+50,train,BC(exact u on boundary),1.880410e+00
+50,test,PDE,8.854272e+03
+50,test,BC(exact u on boundary),1.880410e+00
+60,train,PDE,7.269030e+03
+60,train,BC(exact u on boundary),4.514245e+00
+60,test,PDE,8.341024e+03
+60,test,BC(exact u on boundary),4.514245e+00
+70,train,PDE,6.852714e+03
+70,train,BC(exact u on boundary),5.654989e+00
+70,test,PDE,7.798595e+03
+70,test,BC(exact u on boundary),5.654989e+00
+80,train,PDE,6.251548e+03
+80,train,BC(exact u on boundary),5.868685e+00
+80,test,PDE,7.093601e+03
+80,test,BC(exact u on boundary),5.868685e+00
+90,train,PDE,5.555493e+03
+90,train,BC(exact u on boundary),5.770381e+00
+90,test,PDE,6.299860e+03
+90,test,BC(exact u on boundary),5.770381e+00
+100,train,PDE,4.883887e+03
+100,train,BC(exact u on boundary),5.767101e+00
+100,test,PDE,5.404232e+03
+100,test,BC(exact u on boundary),5.767101e+00

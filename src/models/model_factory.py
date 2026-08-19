@@ -1,6 +1,5 @@
 import deepxde as dde
 from models import *
-from models import AttentionNet
 
 
 def create_model(config, data):

@@ -1,5 +1,8 @@
+import os.path
 import numpy as np
 import csv
+import pandas as pd
+
 
 COMPONENT_NAMES = {
     "Helmholtz2D": ["PDE", "BC(exact u on boundary)"],
@@ -48,3 +51,26 @@ def info_writer(info_path, train_state):
         writer.writerow(['best_step', "best_loss_train", "best_loss_test"])
         writer.writerow([train_state.best_step, train_state.best_loss_train, train_state.best_loss_test])
     pass
+
+
+def load_history(csv_dir, config):
+    log = pd.read_csv(os.path.join(csv_dir, f"{config.example.name}_{config.version}_history.csv"))
+    log = log.dropna(how="all")
+    return log["iteration"], log["train_loss"], log["test_loss"]
+
+
+def load_components(csv_dir, config):
+    path = os.path.join(csv_dir, f"{config.example.name}_{config.version}_components.csv")
+    if not os.path.isfile(path):
+        raise FileNotFoundError(f"Components CSV not found: {path}")
+    log = pd.read_csv(path)
+    log = log.dropna(how="all")
+    train = log[log["split"] == "train"]
+    test = log[log["split"] == "test"]
+    component_names = list(dict.fromkeys(log["component"].tolist()))
+    steps = train.loc[train["component"] == component_names[0], "step"].to_numpy()
+    train_dict = {name: train.loc[train["component"] == name, "loss"].to_numpy()
+                  for name in component_names}
+    test_dict = {name: test.loc[test["component"] == name, "loss"].to_numpy()
+                 for name in component_names}
+    return steps, train_dict, test_dict, component_names
