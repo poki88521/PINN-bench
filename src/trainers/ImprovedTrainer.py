@@ -27,7 +27,7 @@ def _make_aw_loss(sigma, gamma, log_scale):
     return loss_fn
 
 
-def train(model: Model, config, model_path, example):
+def train(model: Model, config, model_path, example, monitor):
     training_config = config.training
     ipinn_config = config.ipinn
     gamma = ipinn_config.gamma
@@ -58,7 +58,8 @@ def train(model: Model, config, model_path, example):
     loss_history, train_state = model.train(iterations=training_config.iterations,
                                             batch_size=training_config.batch_size,
                                             model_save_path=model_path,
-                                            display_every=training_config.display_every)
+                                            display_every=training_config.display_every,
+                                            callbacks=[monitor])
     time_elapsed = time.time() - time_start
     print(f"elapsed time: {time_elapsed:.2f}s")
     return loss_history, train_state, model
@@ -75,13 +76,13 @@ def normalization(config, example, model: Model):
 
 
 def launch(config, example, example_dir):
-    version_dir, model_path, history_path, info_path = StandardTrainer.path_init(config, example_dir)
+    version_dir, model_path, history_path = StandardTrainer.path_init(config, example_dir)
     data = StandardTrainer.create_dataset(example, config.data)
     model = create_model(config, data)
     normalization(config, example, model)
-    loss_history, train_state, model = train(model, config, model_path, example)
-    StandardTrainer.test(example, model, config.data)
-    StandardTrainer.save(loss_history, train_state, history_path, config.training, info_path, example)
+    monitor = StandardTrainer.TrainMonitor(example, config)
+    loss_history, train_state, model = train(model, config, model_path, example, monitor)
+    StandardTrainer.save(loss_history, train_state, history_path, config.training, example, monitor)
 
 
 

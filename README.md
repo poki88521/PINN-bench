@@ -24,7 +24,7 @@ a benchmark that incorporates multiple example for PINN bases on deepXDE and PyT
 ```bash
 conda create -n pinnbench python=3.11 numpy scipy pandas matplotlib pyyaml scikit-learn -y
 conda activate pinnbench
-pip install deepxde
+pip install deepxde torchinfo
 pip install torch --index-url https://download.pytorch.org/whl/cpu
 ```
 
@@ -73,8 +73,16 @@ PINN-Bench/
 3. 训练
     - 训练迭代次数、批量大小等数据均可通过配置文件直接修改（不会再显示于输出中）
     - 和模型相同，不同类型的训练代码也可自定义文件并在trainer_factory.py中添加对应代码
-4. 绘图
-    - 绘图程序按照每个配置文件中的plot节中的设置进行绘图
+    - 有其他需要在训练过程中记录的数据可以写Callback的子类，详见[dde官方文档](https://deepxde.readthedocs.io/en/latest/modules/deepxde.html#module-deepxde.callbacks)
+4. 评估与绘图
+    - 绘图程序默认绘制所选版本的所有图表
+    - 通过传入`--only`参数，可以选择绘制哪些图表，但此处的参数必须与方法名**完全一致**，对照字典如下：
+```python
+plot_func_dict = {
+  "history_plot": history_plot,       #总损失-迭代数曲线
+  "components_plot": components_plot  #各个分量的损失-迭代数曲线
+}
+```
     - 绘图程序也可自定义文件并在plotter_factory.py中添加代码
 5. 配置文件模板
 ```yaml
@@ -108,6 +116,10 @@ dims: #网络结构，包含输入输出维度、深度和宽度
   depth: 5
   width: 70
   out_dim: 1
+
+plots:
+  history_plot: true
+  components_plot: true #是否绘制此图表
 
 (version_name): #此处写版本特有的参数
   gamma: 1000.0 #仅为举例，更多参数可以继续写在此栏目内
@@ -149,12 +161,29 @@ activation_dict = {
 
 
 ## 待办事项
-- 图表制作功能
-- 修改yaml模板，添加plots节
-- 有关本项目的环境配置方法
-- 保存最优模型（可选，可以近似认为最后的模型就是最优模型）
-- 设置存档点（可选，目前可以认为训练流程都较短因此不设置中断存档）
+- 图表制作功能（基础已做，扩展中）
+- ~~保存最优模型（可选，可以近似认为最后的模型就是最优模型）~~
+- ~~设置存档点（可选，目前可以认为训练流程都较短因此不设置中断存档）~~
+- 训练数据记录增强：
+  - ipinn自己的monitor（继承std版本的TrainMonitor），记录sigma轨迹（sigma_pde/sigma_bc/sigma_ic），输出sigma.csv，供sigma_plot/weights_plot使用
+  - 评估模型指标（l2 error 等）与绘图分离（utils/EvalUtils.py 或独立模块）
+- 新图表：
+  - sigma_plot / weights_plot（ipinn 专属，依赖 ipinn monitor 的 sigma 记录）
+  - solution_plot（预测 vs 精确解，需模型重载 .pt）(可视化？)
+  - l2_plot（l2 error 随迭代变化，依赖多 checkpoint 保存，可后置）
+  - ImprovedPlotter：继承 StandardPlotter，注册到 plotter_factory.PLOTTERS 的 "ipinn" 分支
+- 绘图：
+  - 更新 README 的 plot_func_dict 对照表（加 l2_error_plot，之后加 sigma_plot 等）
+- 数据集：
+  - 确认 dataset/ 下是否有 Burgers.npz、Allen_Cahn.mat（无解析解算例依赖），缺失则需准备
+- 其他：
+  - configs 中 standard/ipinn 各 5 个 yaml 的 plots 节确认（当前模板有 history/components，l2/sigma 待加）
 
+
+
+## 保留问题
+- l2_error 曲线缺 step=0 点：TrainMonitor 的 on_epoch_end 只在 `step % display_every == 0` 时记录，首个触发点是 display_every，因此 l2.csv 缺少起点 0（history.csv 从 0 开始）。若后续需要 l2 从 0 开始，可在 on_epoch_begin/on_train_begin 补记初始误差。
+- path_init 的返回参数传递可优化：目前返回 version_dir/model_path/history_path 三元组，info/components/l2 路径均由 history_path 字符串替换推导，调用方需手动拼装。可考虑统一改为返回路径集合对象或字典，减少调用方对命名约定的依赖。
 
 
 

@@ -30,3 +30,7 @@ dims:
   depth: 5
   width: 70
   out_dim: 1
+
+plots:
+  history_plot: true
+  components_plot: true

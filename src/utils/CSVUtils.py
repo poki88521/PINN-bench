@@ -40,12 +40,23 @@ def history_writer(history_path, loss_history, training_config):
     with open(history_path, 'w', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(['iteration', 'train_loss(sum)', 'test_loss(sum)'])
-        #print(f"total num of loss:{len(loss_history.loss_train)}")
         for i, (tr, te) in enumerate(zip(loss_history.loss_train, loss_history.loss_test)):
             writer.writerow([i * training_config.display_every, np.sum(tr), np.sum(te)])
     pass
 
-def info_writer(info_path, train_state):
+
+def l2_error_writer(history_path, monitor):
+    info_path = history_path.replace("_history.csv", "_l2.csv")
+    with open(info_path, 'w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(['step', "l2_error"])
+        for (step, l2) in zip(monitor.steps, monitor.l2_errors):
+            writer.writerow([step, l2])
+    pass
+
+
+def info_writer(history_path, train_state):
+    info_path = history_path.replace("_history.csv", "_info.csv")
     with open(info_path, 'w', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(['best_step', "best_loss_train", "best_loss_test"])
@@ -56,7 +67,7 @@ def info_writer(info_path, train_state):
 def load_history(csv_dir, config):
     log = pd.read_csv(os.path.join(csv_dir, f"{config.example.name}_{config.version}_history.csv"))
     log = log.dropna(how="all")
-    return log["iteration"], log["train_loss"], log["test_loss"]
+    return log["iteration"], log["train_loss(sum)"], log["test_loss(sum)"]
 
 
 def load_components(csv_dir, config):
@@ -74,3 +85,9 @@ def load_components(csv_dir, config):
     test_dict = {name: test.loc[test["component"] == name, "loss"].to_numpy()
                  for name in component_names}
     return steps, train_dict, test_dict, component_names
+
+
+def load_l2(csv_dir, config):
+    log = pd.read_csv(os.path.join(csv_dir, f"{config.example.name}_{config.version}_l2.csv"))
+    log = log.dropna(how="all")
+    return log["step"], log["l2_error"]
