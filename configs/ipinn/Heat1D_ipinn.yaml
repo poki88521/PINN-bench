@@ -5,19 +5,17 @@ example:
   alpha: 0.4
 
 model:
-  model_name: "AttentionNet"
+  model_name: "FNN"
   activation: "tanh"
   init: "Glorot normal"
 
 training:
-  trainer_name: "ImprovedTrainer"
+  trainer_name: "StandardTrainer"
   optimizer: "adam"
   lr: 0.001
   iterations: 100
   batch_size: 128
   display_every: 10
-  lr_decay_step: 1000
-  lr_decay_gamma: 0.9
 
 data:
   num_domain: 10000
@@ -32,5 +30,11 @@ dims:
   out_dim: 1
 
 ipinn:
+  model:
+    model_name: "AttentionNet"
+  training:
+    trainer_name: "ImprovedTrainer"
+    lr_decay_step: 1000
+    lr_decay_gamma: 0.9
   gamma: 1000.0
   n_samples: 100000

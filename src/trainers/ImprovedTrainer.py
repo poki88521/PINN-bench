@@ -4,10 +4,12 @@ import numpy as np
 import time
 import torch
 from trainers import StandardTrainer
+from trainers.monitors import ImprovedMonitor
 from models import create_model
 
 
-# ---------------------------------------------------------------- 输入归一化
+
+#输入归一化
 def compute_normalization(example, n_samples=100000):
     geom = example.geomtime if example.time_domain is not None else example.geom
     X = geom.random_points(n_samples)
@@ -16,7 +18,7 @@ def compute_normalization(example, n_samples=100000):
     return X.mean(0), sigma
 
 
-# ---------------------------------------------------------------- AW 自适应加权损失
+#自适应加权损失
 def _make_aw_loss(sigma, gamma, log_scale):
 
     def loss_fn(y_true, y_pred):
@@ -27,13 +29,11 @@ def _make_aw_loss(sigma, gamma, log_scale):
     return loss_fn
 
 
-def train(model: Model, config, model_path, example, monitor):
+def train(model: Model, config, model_path, example, monitor, sigmas):
     training_config = config.training
     ipinn_config = config.ipinn
     gamma = ipinn_config.gamma
-    sigma_pde = dde.Variable(1.0)
-    sigma_bc = dde.Variable(1.0)
-    sigma_ic = dde.Variable(1.0)
+    sigma_pde, sigma_bc, sigma_ic = sigmas
 
     # deepxde data.PDE.losses 的分量顺序：PDE 残差在前，BC/IC 在后。
     # 当前各算例 pde 均返回单个残差张量，故 n_pde = 1。
@@ -80,8 +80,10 @@ def launch(config, example, example_dir):
     data = StandardTrainer.create_dataset(example, config.data)
     model = create_model(config, data)
     normalization(config, example, model)
-    monitor = StandardTrainer.TrainMonitor(example, config)
-    loss_history, train_state, model = train(model, config, model_path, example, monitor)
+    sigmas = [dde.Variable(1.0), dde.Variable(1.0), dde.Variable(1.0)]
+    sigma_names = ["sigma_pde", "sigma_bc", "sigma_ic"]
+    monitor = ImprovedMonitor(example, config, sigmas, sigma_names)
+    loss_history, train_state, model = train(model, config, model_path, example, monitor, sigmas)
     StandardTrainer.save(loss_history, train_state, history_path, config.training, example, monitor)
 
 

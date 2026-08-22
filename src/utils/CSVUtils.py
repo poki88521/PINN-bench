@@ -16,8 +16,8 @@ COMPONENT_NAMES = {
 }
 
 
-def component_writer(history_path, loss_history, example):
-    component_path = history_path.replace("_history.csv", "_components.csv")
+def component_writer(csv_path, loss_history, example):
+    component_path = csv_path.replace("_name.csv", "_components.csv")
     n_components = len(loss_history.loss_train[0])
     names = COMPONENT_NAMES.get(example.name)
     if names is None or len(names) != n_components:
@@ -36,7 +36,8 @@ def component_writer(history_path, loss_history, example):
                 writer.writerow([step, "test", name, f"{value:.6e}"])
 
 
-def history_writer(history_path, loss_history, training_config):
+def history_writer(csv_path, loss_history, training_config):
+    history_path = csv_path.replace("_name.csv", "_history.csv")
     with open(history_path, 'w', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(['iteration', 'train_loss(sum)', 'test_loss(sum)'])
@@ -45,8 +46,8 @@ def history_writer(history_path, loss_history, training_config):
     pass
 
 
-def l2_error_writer(history_path, monitor):
-    info_path = history_path.replace("_history.csv", "_l2.csv")
+def l2_error_writer(csv_path, monitor):
+    info_path = csv_path.replace("_name.csv", "_l2.csv")
     with open(info_path, 'w', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(['step', "l2_error"])
@@ -55,8 +56,19 @@ def l2_error_writer(history_path, monitor):
     pass
 
 
-def info_writer(history_path, train_state):
-    info_path = history_path.replace("_history.csv", "_info.csv")
+def sigma_writer(csv_path, monitor):
+    sigma_path = csv_path.replace("_name.csv", "_sigma.csv")
+    with open(sigma_path, 'w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(["step"] + monitor.sigma_names)
+        for i, step in enumerate(monitor.sigma_steps):
+            writer.writerow([step] + [monitor.sigma_values[name][i]
+                                      for name in monitor.sigma_names])
+    pass
+
+
+def info_writer(csv_path, train_state):
+    info_path = csv_path.replace("_name.csv", "_info.csv")
     with open(info_path, 'w', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(['best_step', "best_loss_train", "best_loss_test"])
@@ -91,3 +103,15 @@ def load_l2(csv_dir, config):
     log = pd.read_csv(os.path.join(csv_dir, f"{config.example.name}_{config.version}_l2.csv"))
     log = log.dropna(how="all")
     return log["step"], log["l2_error"]
+
+
+def load_sigma(csv_dir, config):
+    path = os.path.join(csv_dir, f"{config.example.name}_{config.version}_sigma.csv")
+    if not os.path.isfile(path):
+        raise FileNotFoundError(f"Sigma CSV not found: {path}")
+    log = pd.read_csv(path)
+    log = log.dropna(how="all")
+    steps = log["step"].to_numpy()
+    names = [col for col in log.columns if col != "step"]
+    sigma_dict = {col: log[col].to_numpy() for col in names}
+    return steps, sigma_dict, names
