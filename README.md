@@ -77,6 +77,7 @@ PINN-Bench/
     - 在monitors.py中可以自定义Monitor，继承TrainMonitor即可
 4. 评估与绘图
     - 绘图程序默认绘制所选版本的所有图表
+    - 绘图程序也可自定义文件并在plotter_factory.py中添加代码
     - 通过传入`--only`参数，可以选择绘制哪些图表，但此处的参数必须与方法名**完全一致**，对照字典如下：
 ```python
 plot_func_dict = {
@@ -87,7 +88,7 @@ plot_func_dict = {
   "sigma_plot": sigma_plot #损失函数权重-迭代数曲线
 }
 ```
-    - 绘图程序也可自定义文件并在plotter_factory.py中添加代码
+
 5. 配置文件模板
 ```yaml
 version: (version_name) #版本名，需与configs下的子目录名一致
