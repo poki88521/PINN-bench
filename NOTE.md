@@ -38,11 +38,11 @@
 - std 对照训练调度建议放版本 trainer 内部（ImprovedTrainer.launch 末尾），trainer_factory 只做配置合并+分派
 
 ## 待办事项
-- writer抽取为类？
 - 新图表：
   - solution_plot（预测 vs 精确解，需模型重载 .pt）(可视化？)
   - 新模型与std模型的对照图（位于improved plotter中）
 - yaml模板更新
+- 脚本保存目录
 - **可选待办事项**
   - 保存最优模型（可以近似认为最后的模型就是最优模型）
   - 设置存档点（目前可以认为训练流程都较短因此不设置中断存档）
@@ -54,4 +54,5 @@
 
 ## 保留问题
 - l2_error 曲线缺 step=0 点：TrainMonitor 的 on_epoch_end 只在 `step % display_every == 0` 时记录，首个触发点是 display_every，因此 l2.csv 缺少起点 0（history.csv 从 0 开始）。若后续需要 l2 从 0 开始，可在 on_epoch_begin/on_train_begin 补记初始误差。
+- ImprovedPlotter.sigma_plot 未处理 CSVLoader.sigma() 返回 None 的情况：若 sigma 文件缺失（如被删、训练中断），解包 None 会崩。正常流程（ipinn 必有 sigma 文件）不触发，暂不处理，仅记录。
 
