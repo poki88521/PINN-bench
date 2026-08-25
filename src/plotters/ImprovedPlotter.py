@@ -2,16 +2,15 @@ import matplotlib.pyplot as plt
 import os
 import numpy as np
 from plotters import StandardPlotter
-from utils import CSVUtils
 
 
 class ImprovedPlotter(StandardPlotter):
-    def __init__(self, csv_dir, config, only=None):
-        super().__init__(csv_dir, config, only)
+    def __init__(self, csv_dir, config, base_name, only=None):
+        super().__init__(csv_dir, config, base_name, only)
 
     def sigma_plot(self):
         print("drawing sigma plot...")
-        steps, sigma_dict, names = CSVUtils.load_sigma(self.csv_dir, self.config)
+        steps, sigma_dict, names = self.loader.sigma()
         fig, axs = plt.subplots(1, len(sigma_dict), figsize=(5 * len(sigma_dict), 5))
         fig.suptitle("Sigma plot")
         axs = np.atleast_1d(axs)

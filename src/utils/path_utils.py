@@ -7,4 +7,7 @@ def path_init(base_dir, name, version):
     runs_dir = os.path.join(base_dir, 'runs')
     output_dir = os.path.join(runs_dir, name, version)
     os.makedirs(output_dir, exist_ok=True)
-    return config_path, output_dir, dataset_dir
+    base_name = f"{name}_{version}"
+    return config_path, output_dir, dataset_dir, base_name
+
+

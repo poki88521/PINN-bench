@@ -10,8 +10,8 @@
 ## 开发原则
 - 整个项目为PINN改进尽可能提供模板和接口（即工作节内部被封装，改进时无需修改）
 - 一个版本对应一个训练-评估与保存-绘图的工作流，训练入口应当和绘图入口分离，版本间尽可能分离
-- 新版本工作流必须继承自standard工作流，通过固定的接口来自定义并修改std工作流中的内容
-- std版本同时充当模板和运行的功能
+- 新版本工作流必须继承自standard工作流（或标准模板），通过固定的接口来实现新工作流中的内容
+- std版本主要充当运行的功能，模板可能为独立内容
 - 算例、模型、训练和绘图组件均通过factory进行调度
 
 ## 配置分层约定
@@ -38,12 +38,10 @@
 - std 对照训练调度建议放版本 trainer 内部（ImprovedTrainer.launch 末尾），trainer_factory 只做配置合并+分派
 
 ## 待办事项
-- main.py / trainer_factory 接入 get_version_config（当前顶层 trainer_name 为 StandardTrainer，直接分派会错误走 std）
-- ImprovedTrainer / trainer_factory 同步到 StandardTrainer 的类结构（当前 ImprovedTrainer 仍是模块函数风格）
-- 图表制作功能（基础已做，扩展中）
-- 设置自动std基准训练（每进行一次版本训练就自动跑一个std版本的模型作为对照）
+- writer抽取为类？
 - 新图表：
   - solution_plot（预测 vs 精确解，需模型重载 .pt）(可视化？)
+  - 新模型与std模型的对照图（位于improved plotter中）
 - yaml模板更新
 - **可选待办事项**
   - 保存最优模型（可以近似认为最后的模型就是最优模型）
@@ -56,4 +54,4 @@
 
 ## 保留问题
 - l2_error 曲线缺 step=0 点：TrainMonitor 的 on_epoch_end 只在 `step % display_every == 0` 时记录，首个触发点是 display_every，因此 l2.csv 缺少起点 0（history.csv 从 0 开始）。若后续需要 l2 从 0 开始，可在 on_epoch_begin/on_train_begin 补记初始误差。
-- path_init 的返回参数传递可优化：目前返回 version_dir/model_path/history_path 三元组，info/components/l2 路径均由 history_path 字符串替换推导，调用方需手动拼装。可考虑统一改为返回路径集合对象或字典，减少调用方对命名约定的依赖。
+

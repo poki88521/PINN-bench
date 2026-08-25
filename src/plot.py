@@ -15,9 +15,8 @@ def get_args():
 if __name__ == "__main__":
     args = get_args()
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    config_path, RUNS_DIR, DATASET_DIR = path_init(BASE_DIR, args.name, args.version)
+    config_path, csv_dir, DATASET_DIR, base_name = path_init(BASE_DIR, args.name, args.version)
     if not os.path.isfile(config_path):
         raise FileNotFoundError(f"Config not found: {config_path}")
     config = load_yaml(config_path)
-    csv_dir = os.path.join(RUNS_DIR, config.version)
-    plotters.draw_plots(args.version, args.only, csv_dir, config)
+    plotters.draw_plots(args.version, args.only, csv_dir, config, base_name)

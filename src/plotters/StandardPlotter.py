@@ -1,15 +1,20 @@
-from utils import CSVUtils
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+from utils import CSVLoader
 
 
 class StandardPlotter:
-    def __init__(self, csv_dir, config, only=None):
+    def __init__(self, csv_dir, config, base_name, only=None):
         self.csv_dir = csv_dir
         self.config = config
+        self.base_name = base_name
+        self.loader = self.get_loader()
         for plot_func in self.resolve_plots(only):
             plot_func()
+
+    def get_loader(self):
+        return CSVLoader(self.csv_dir, self.base_name)
 
     def plot_methods(self):
         #当前类可用的全部绘图方法名（以_plot 结尾）
@@ -32,7 +37,7 @@ class StandardPlotter:
 
     def history_plot(self):
         print("drawing total loss plot...")
-        iteration, train_loss, test_loss = CSVUtils.load_history(self.csv_dir, self.config)
+        iteration, train_loss, test_loss = self.loader.history()
         fig, ax = plt.subplots(figsize=(10, 5))
         ax.set_title("Total Loss")
         ax.plot(iteration, train_loss, label="Train")
@@ -49,7 +54,7 @@ class StandardPlotter:
 
     def components_plot(self):
         print("drawing components loss plot...")
-        steps, train_dict, test_dict, names = CSVUtils.load_components(self.csv_dir, self.config)
+        steps, train_dict, test_dict, names = self.loader.components()
         fig, axes = plt.subplots(1, len(names), figsize=(5 * len(names), 5))
         fig.suptitle("Components Loss")
         axes = np.atleast_1d(axes)
@@ -69,7 +74,7 @@ class StandardPlotter:
 
     def l2_error_plot(self):
         print("drawing l2 error plot...")
-        step, l2 = CSVUtils.load_l2(self.csv_dir, self.config)
+        step, l2 = self.loader.l2()
         fig, ax = plt.subplots(figsize=(10, 5))
         ax.set_title("L2 Error")
         ax.plot(step, l2, label="L2 error")
