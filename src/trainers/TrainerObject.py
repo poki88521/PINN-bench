@@ -2,7 +2,7 @@ import time
 import os
 from models import create_model
 from trainers.monitors import TrainMonitor
-from utils import CSVWriter
+from utils import WriterObject
 
 
 class TrainerObject:
@@ -45,7 +45,7 @@ class TrainerObject:
 
     #获取写入器钩子，可重写
     def make_writer(self):
-        return CSVWriter(self.output_dir, self.base_name, self.monitor)
+        return WriterObject(self.output_dir, self.base_name, self.monitor)
 
     #训练后处理钩子，可重写
     def after_train(self, loss_history, train_state, model):

@@ -15,7 +15,7 @@ COMPONENT_NAMES = {
 }
 
 
-class CSVWriter:
+class WriterObject:
     def __init__(self, output_dir, base_name, monitor):
         self.output_dir = output_dir
         self.base_name = base_name
@@ -75,7 +75,7 @@ class CSVWriter:
 
 
 
-class ImprovedWriter(CSVWriter):
+class ImprovedWriter(WriterObject):
     def __init__(self, output_dir, base_name, monitor):
         super().__init__(output_dir, base_name, monitor)
 

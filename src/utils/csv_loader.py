@@ -2,7 +2,7 @@ import os
 import pandas as pd
 
 
-class CSVLoader:
+class LoaderObject:
     def __init__(self, csv_dir, base_name):
         self.csv_dir = csv_dir
         self.base_name = base_name
@@ -38,6 +38,8 @@ class CSVLoader:
         log = self._read_csv("l2")
         return log["step"], log["l2_error"]
 
+
+class ImprovedLoader(LoaderObject):
     def sigma(self, required=False):
         log = self._read_csv("sigma", required=required)
         if log is None:
@@ -46,7 +48,3 @@ class CSVLoader:
         names = [col for col in log.columns if col != "step"]
         sigma_dict = {col: log[col].to_numpy() for col in names}
         return steps, sigma_dict, names
-
-
-class ImprovedLoader(CSVLoader):
-    pass

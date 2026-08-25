@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-from utils import CSVLoader
+from utils import LoaderObject
 
 
 class StandardPlotter:
@@ -14,7 +14,7 @@ class StandardPlotter:
             plot_func()
 
     def get_loader(self):
-        return CSVLoader(self.csv_dir, self.base_name)
+        return LoaderObject(self.csv_dir, self.base_name)
 
     def plot_methods(self):
         #当前类可用的全部绘图方法名（以_plot 结尾）
