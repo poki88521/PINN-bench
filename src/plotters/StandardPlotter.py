@@ -1,14 +1,15 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-from utils import LoaderObject
+from utils import LoaderObject, Evaluator
 
 
 class StandardPlotter:
-    def __init__(self, csv_dir, config, base_name, only=None):
+    def __init__(self, csv_dir, config, base_name, evaluator, only=None):
         self.csv_dir = csv_dir
         self.config = config
         self.base_name = base_name
+        self.evaluator = evaluator
         self.loader = self.get_loader()
         for plot_func in self.resolve_plots(only):
             plot_func()
@@ -88,4 +89,34 @@ class StandardPlotter:
         print(f"saved: {out_path}")
         pass
 
-
+    #预测场热力图（预测 | 精确 | 绝对误差）
+    def solution_plot(self):
+        print("drawing solution plot...")
+        x_test, u_pred, u_true, abs_err = self.evaluator.predict()
+        nx = len(np.unique(x_test[:, 0]))
+        ny = len(np.unique(x_test[:, 1]))
+        X = x_test[:, 0].reshape(ny, nx)
+        Y = x_test[:, 1].reshape(ny, nx)
+        U = u_pred.reshape(ny, nx)
+        T = u_true.reshape(ny, nx)
+        E = abs_err.reshape(ny, nx)
+        if self.evaluator.example.time_domain is not None:
+            xlabel, ylabel = "x", "t"
+        else:
+            xlabel, ylabel = "x", "y"
+        fig, axes = plt.subplots(1, 3, figsize=(15, 4.5))
+        for ax, data, title, cmap in [
+                (axes[0], U, "Predicted", "RdBu_r"),
+                (axes[1], T, "Exact", "RdBu_r"),
+                (axes[2], E, "|Pred - Exact|", "hot")]:
+            im = ax.pcolormesh(X, Y, data, cmap=cmap, shading="auto")
+            ax.set_title(title)
+            ax.set_xlabel(xlabel)
+            ax.set_ylabel(ylabel)
+            fig.colorbar(im, ax=ax)
+        fig.suptitle(f"Solution: {self.config.example.name}")
+        fig.tight_layout()
+        out_path = os.path.join(self.csv_dir, f"{self.base_name}_solution.png")
+        fig.savefig(out_path)
+        plt.close(fig)
+        print(f"saved: {out_path}")

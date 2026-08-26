@@ -13,25 +13,27 @@
 - 新版本工作流必须继承自standard工作流（或标准模板），通过固定的接口来实现新工作流中的内容
 - std版本主要充当运行的功能，模板可能为独立内容
 - 算例、模型、训练和绘图组件均通过factory进行调度
+- 函数前一行， 类的第一行写注释表示功能（此注释通常为一行，不得超过三行）
 
 ## 配置分层约定
 - 顶层配置 = std 基线（FNN + StandardTrainer）；与 version 同名的覆盖节（如 ipinn:）= 该版本专属配置（AttentionNet + ImprovedTrainer + lr_decay + gamma + n_samples）
 - utils/ConfigUtils.py 提供：AttrDict、load_yaml、merge_config(base, override)（递归覆盖合并，基于 deepcopy；已验证 deepcopy 保留 AttrDict 类型与点号访问）、get_version_config(config)（存在同名覆盖节则合并，否则返回顶层）
-- 注意：main.py / trainer_factory 尚未接入 get_version_config，顶层 trainer_name 现为 StandardTrainer，直接分派会错误走 std（见待办）
+- trainer_factory 与 plot.py 均已接入 get_version_config：trainer 用合并后配置分派（顶层 trainer_name 是 StandardTrainer，覆盖节内才是 ImprovedTrainer）
 
 ## 代码结构（src/）
-- models/create_model：按 config 切换 FNN / AttentionNet
-- trainers/：StandardTrainer（类）、ImprovedTrainer（仍是旧模块函数风格，未同步到类结构）、monitors.py（TrainMonitor / ImprovedMonitor）、trainer_factory（未同步）
-- plotters/：StandardPlotter（类，_plot 结尾方法自动收集，resolve_plots 支持 only 过滤）、ImprovedPlotter(StandardPlotter)（sigma_plot）、plotter_factory.PLOTTERS
-- plot.py：-n -v -o 参数，csv_dir = RUNS_DIR/config.version
+- models/：FNN（StandardModel.py）、AttentionNet（AttentionModel.py）、model_factory.create_model
+- trainers/：TrainerObject（基类模板）、StandardTrainer、ImprovedTrainer、monitors.py、trainer_factory（均已同步为类结构）
+- plotters/：StandardPlotter（history/components/l2/solution）、ImprovedPlotter（+sigma/compare 系列）、plotter_factory
+- utils/：path_utils、config_utils、csv_writer（WriterObject/ImprovedWriter）、csv_loader（LoaderObject/ImprovedLoader）、Evaluator、other_utils
+- plot.py：-n -v -o 参数，csv_dir = RUNS_DIR/config.version；main.py：训练入口
 
-## Trainer 继承重写点（分析结论）
-- create_dataset / save：不用重写（save 已用 hasattr(monitor, "sigma_names") 兼容 sigma 差异）
-- train：必重写（ipinn 差异：AW loss 列表 + decay=("step",...) + external_trainable_variables；签名与返回值须与父类一致）
-- __init__：建议不改；父类应加空钩子 preprocess()（建 model 后调用），ImprovedTrainer 重写它做 normalization（apply_feature_transform 必须在 compile 前挂到 net）
-- launch：差异集中在 monitor 类型（TrainMonitor → ImprovedMonitor，需要 sigmas）与训练前预处理；建议父类抽 make_monitor() 钩子，或子类整体重写 launch
-- path_init：建议重写或参数化（csv 文件名带 _name 占位符遗留；ipinn 末尾跑 std 对照需第二组路径）
-- 最小改动方案：StandardTrainer 增加 preprocess() + make_monitor() 两个空钩子，ImprovedTrainer 继承并只重写 preprocess / make_monitor / train
+## Trainer 继承重写点（已落地为 TrainerObject）
+- 基类 TrainerObject：__init__(config→data→model→preprocess) → launch(make_monitor→make_writer→train→save→after_train)
+- 钩子（可重写）：preprocess（默认pass，ipinn做归一化）、make_monitor（默认TrainMonitor）、make_writer（默认WriterObject）、after_train（默认pass，ipinn跑std对照）
+- 步骤（可重写但签名固定）：train(training_config, monitor)→(loss_history, train_state)、save(...)、create_dataset
+- launch 禁止重写；train 返回类型固定；model_path 为属性
+- 子类（ImprovedTrainer）重写：preprocess/make_monitor/make_writer/train/save(补sigma)/after_train(跑control)
+- 对照组目录：runs/{example}/{version}/control/（与 ImprovedPlotter.loader_c 路径约定一致）
 
 ## 已确认结论
 - l2 上升是训练长度问题（100 iter 太短），代码正确；重载 .pt 重算 l2 与 l2.csv 完全一致
@@ -39,15 +41,15 @@
 
 ## 待办事项
 - 新图表：
-  - solution_plot（预测 vs 精确解，需模型重载 .pt）两种呈现形式均保留（scratch/solution_plot_demo.py 有示意）：
-    - 形式A：场热力图三子图（预测 | 精确 | 绝对误差），通用性强，所有算例统一
-    - 形式B：时间切片曲线（固定若干 t 画 u(x)），仅 time-dependent 算例适用
-    - 扩展预案：若未来有 >2D 输入算例，热力图退化为切片热力图（固定第 3 维取若干值画 2D 场组图），4D+ 仅切片
-  - 更多新模型与std模型的对照图（位于improved plotter中）
-- yaml模板更新
-- 脚本保存目录
+  - solution_plot（预测 vs 精确解）形式A 场热力图已实现（三子图：预测|精确|绝对误差，StandardPlotter.solution_plot，依赖 Evaluator 重载模型）
+  - 形式B 时间切片曲线：**暂不实现**（用户决定，保留在可选待办）
+  - solution_plot 对照组对比：**暂不实现**（用户决定，solution 不需要和对照组比较，保留在可选待办）
+- readme更新（时间定于ipinn版本基本完成后）
+- 运行脚本目录待修改
 
 - **可选待办事项**
+  - solution_plot 形式B 时间切片曲线（暂不做，需要时从 scratch/solution_plot_demo.py 参考）
+  - solution_plot 对照组对比（暂不做，用户认为 solution 不需要与对照组比较）
   - solution_plot 可选动画形式（(x,y,t) 类算例逐帧合成）
   - CSV 读写类命名（WriterObject / LoaderObject 体系）可能再调整（等用户通知后统一改）
   - 保存最优模型（可以近似认为最后的模型就是最优模型）
@@ -55,6 +57,13 @@
   - 图表中设置希腊字母（美观度问题，暂时忽略）
   - 文件名等代码风格重构（不影响代码使用）
   - 确认数据集存在否则报错（暂不影响使用）
+  - 规则1（函数/类前一行注释 ≤3行）全面补全（用户自行按规则补齐）
+
+- **新增发现（本次检查补充）**
+  - main.py 创建 example 用的是原始 config，而 trainer_factory 内部分派用 merged 配置：目前 example 参数未被版本覆盖（example 节相同），若未来某版本覆盖 example 节参数会导致训练与评估不一致，需留意
+  - Evaluator.load_model 用 `f"{base_name}_model-{iterations}.pt"` 硬编码最终迭代步：若训练中途中断或 iterations 改变，文件可能不存在；更稳妥是扫描 `model-*.pt` 取最大 step（latest checkpoint）
+  - Evaluator.load_model 每次 compile 耗时约 3.5s（重建计算图），频繁调用评估/画图时可考虑缓存已编译模型
+  - Burgers1D / AllenCahn1D 的 solution_plot 未实测（依赖 dataset 数据文件，已确认 dataset/ 下 Allen_Cahn.mat、Burgers.npz 存在，但画图链路未验证）
 
 
 

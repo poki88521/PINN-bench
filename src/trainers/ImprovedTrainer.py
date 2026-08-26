@@ -1,12 +1,11 @@
-from deepxde import Model
-import deepxde as dde
+from deepxde import dde
 import numpy as np
 import time
 import os
 import torch
 from trainers import TrainerObject, StandardTrainer
 from trainers.monitors import ImprovedMonitor
-from utils import ImprovedWriter
+from utils import ImprovedWriter, normalization
 
 
 class ImprovedTrainer(TrainerObject):
@@ -64,21 +63,12 @@ class ImprovedTrainer(TrainerObject):
 
     def after_train(self, loss_history, train_state, model):
         # 训练结束后跑一个standard版本作为对照组（基础训练参数不变），命名为control
-        std_output_dir = os.path.join(os.path.dirname(self.output_dir), "control")
+        std_output_dir = os.path.join(self.output_dir, "control")
         os.makedirs(std_output_dir, exist_ok=True)
         std_base_name = f"{self.example.name}_control"
         std_trainer = StandardTrainer(self.base_config, self.example,
                                       std_output_dir, std_base_name)
         std_trainer.launch()
-
-
-#输入归一化
-def compute_normalization(example, n_samples=100000):
-    geom = example.geomtime if example.time_domain is not None else example.geom
-    X = geom.random_points(n_samples)
-    sigma = X.std(0)
-    sigma[sigma < 1e-8] = 1.0  # 防止某维无变化导致除零
-    return X.mean(0), sigma
 
 
 #自适应加权损失
@@ -90,16 +80,6 @@ def _make_aw_loss(sigma, gamma, log_scale):
         return w * loss + log_scale * torch.log(sigma ** 2 + 1.0 / gamma)
 
     return loss_fn
-
-
-def normalization(config, example, model: Model):
-    mu, sigma = compute_normalization(example, config.ipinn.n_samples)
-    net = model.net
-    net.register_buffer("norm_mu", torch.as_tensor(np.asarray(mu, dtype=np.float32),
-                                                   dtype=torch.get_default_dtype()))
-    net.register_buffer("norm_sigma", torch.as_tensor(np.asarray(sigma, dtype=np.float32),
-                                                      dtype=torch.get_default_dtype()))
-    net.apply_feature_transform(lambda x: (x - net.norm_mu) / net.norm_sigma)
 
 
 

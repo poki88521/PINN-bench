@@ -1,7 +1,8 @@
 import argparse
 import os
 import plotters
-from utils import load_yaml, path_init
+from examples import create_example
+from utils import load_yaml, path_init, get_version_config, Evaluator
 
 
 def get_args():
@@ -12,6 +13,7 @@ def get_args():
                         help="only draw plots that name is given, or draw all plots")
     return parser.parse_args()
 
+
 if __name__ == "__main__":
     args = get_args()
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -19,4 +21,7 @@ if __name__ == "__main__":
     if not os.path.isfile(config_path):
         raise FileNotFoundError(f"Config not found: {config_path}")
     config = load_yaml(config_path)
-    plotters.draw_plots(args.version, args.only, csv_dir, config, base_name)
+    merged = get_version_config(config)
+    example = create_example(args.name, DATASET_DIR, merged)
+    evaluator = Evaluator(merged, example, base_name, csv_dir)
+    plotters.draw_plots(args.version, args.only, csv_dir, merged, base_name, evaluator)
