@@ -5,9 +5,9 @@ from trainers.monitors import TrainMonitor
 from utils import WriterObject
 
 
+# 所有trainer类的基类
+# 使用方法:Trainer(...).launch()
 class TrainerObject:
-    #所有trainer类的基类
-    #使用方法:Trainer(...).launch()
     #init(dataset -> model -> preprocess) -> launch(monitor -> writer -> train -> save -> after_train)
 
     def __init__(self, config, example, output_dir, base_name, base_config=None):
@@ -76,6 +76,7 @@ class TrainerObject:
         print(f"elapsed time: {time_elapsed:.2f}s")
         return loss_history, train_state
 
+    #保存文件（依赖writer工作）
     def save(self, loss_history, train_state, training_config):
         self.writer.history(loss_history, self.config.training)
         self.writer.components(loss_history, self.example)

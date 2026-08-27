@@ -28,7 +28,7 @@ class AttrDict(dict):
     def __delattr__(self, key):
         del self[key]
 
-
+#加载yaml文件为属性字典类（入口）
 def load_yaml(config_path):
     with open(config_path, 'r', encoding='utf-8') as f:
         raw_dict = yaml.safe_load(f)
@@ -47,8 +47,8 @@ def merge_config(base, override):
     return merged
 
 
+#生成版本完整配置的入口
 def get_version_config(config):
-    #生成版本完整配置的入口
     override = getattr(config, config.version, None)
     if isinstance(override, dict):
         return merge_config(config, override)

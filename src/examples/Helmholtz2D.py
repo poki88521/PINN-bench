@@ -3,7 +3,7 @@ import deepxde as dde
 import torch
 from examples.ExampleObject import ExampleObject
 
-
+#算例具体信息见examples.md
 class Helmholtz2D(ExampleObject):
     def __init__(self, dataset_dir, example_config):
         super().__init__()

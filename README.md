@@ -1,67 +1,56 @@
 ## PINN-bench
-a benchmark that incorporates multiple example for PINN bases on deepXDE and PyTorch
+- a benchmark that incorporates multiple example for PINN bases on deepXDE and PyTorch
+- 此项目理论基础均来自论文[1]，拓展示例来自[2]
 
 ## 功能
-- 可以PINN改进的验证工具，为拓展和改进网络结构、训练流程、损失函数提供接口（详见使用方法）
-- 包含以下算例且可以通过.yaml的配置文件来修改超参数：
-    + 一维热传导方程（Heat1D）
-    + 一维波动方程（Wave1D）
-    + Allen-Cahn方程（AllenCahn1D）
-    + 一维Burgers方程（Burgers1D）
-    + 二维Helmholtz方程（Helmholtz2D）
-- 自动训练、打印、保存数据
-- 可以通过绘图入口自动画图（支持自定义图表，详见使用方法）
-- 包含I-PINN为理论基础的改进结构代码（论文[2]）
+1. 训练模型：提供完整模型训练流程
+2. 验证创新方案：提供网络结构、训练流程、损失函数的创新方案拓展接口，且已经包含了基于论文[2]的改进代码示例（详见使用方法）
+3. 多算例集成：包含多个算例（具体内容详见examples.md），可通过.yaml的配置文件来修改超参数
+4. 自动对照组生成与绘图：包含对照组模型与数据生成方案，可以生成与对照组的对比图
 
-## 算例简介
-见examples.md
 
 ## 快速开始（Windows）
 1. 环境配置
-
 基础依赖由 conda 安装（避免 numpy 与 matplotlib 等二进制扩展的版本冲突），deepxde 用 pip 安装。
-
 ```bash
 conda create -n pinnbench python=3.11 numpy scipy pandas matplotlib pyyaml scikit-learn -y
 conda activate pinnbench
 pip install deepxde torchinfo
 pip install torch --index-url https://download.pytorch.org/whl/cpu
 ```
-
 说明：pytorch 为 CPU 版（无需 GPU 即可运行全部算例；如日后在带 NVIDIA 显卡的机器上运行，可改用 `pip install torch --index-url https://download.pytorch.org/whl/cu121`）
 
-2. 启动：在项目根目录下运行以下命令即可：
-```bash
-python src/main.py -n Helmholtz2D -v standard
-```
+2. 启动：
+- 运行`scripts/run_std.bat`来启动std版本、默认算例的训练
+- 运行`scripts/run_ipinn.bat`来启动ipinn版本、默认算例的训练
+- 运行`scripts/run_all.bat`来启动std版本、所有算例的训练
 
-- `-n / --name`：算例名（Heat1D / Helmholtz2D / Wave1D / AllenCahn1D / Burgers1D）
-- `-v / --version`：版本名，对应 `configs/{version}/` 目录下的配置文件（如 standard、ipinn）
-
-不带参数时默认运行 `Helmholtz2D / standard`（该算例有解析解，不依赖 dataset 目录下的数据文件）
-3. 绘图：......
+3. 绘图：
+- 运行`scripts/plot.bat`来启动std版本、默认算例的绘图程序
 
 ## 项目结构
 ```text
 PINN-Bench/
 ├── configs/                # YAML配置（命名格式为{exmaple}_{version}.yaml）
 ├── dataset/                # 算例数据集（无解析解时）
+├── scripts/                # 运行脚本
 ├── runs/                   # 运行结果（不同版本的模型文件、历史记录等）
 |   └── (example_name)/            
 |       ├── standard/       
 |       └── (version_name)/             
 ├── src/                    # 代码区
 │   ├── examples/           # 算例包（算例方程、边界条件等）
-│   ├── models/             # 模型包（FNN模型）
+│   ├── models/             # 模型包（FNN、注意力模型）
 │   ├── trainers/           # 训练包（完整训练流程）
-│   ├── plotters/           # 绘图包（损失曲线、损失分量曲线）
+│   ├── plotters/           # 绘图包（损失曲线、损失分量曲线等图表绘制代码）
 │   ├── utils/              # 工具包（YAML读取，路径读取等）
 │   ├── plot.py             # 绘图主程序
 │   └── main.py             # 训练主程序
 ├── examples.md             # 算例说明
 └── README.md
 ```
-本项目中的模型、算例和训练器均已解耦，可以通过factory的方式进行拓展，详情见使用方法
+- 本项目中的模型、算例和训练器均已解耦，可以通过factory的方式进行拓展，详情见使用方法
+- 各包内具体内容详见使用方法，此处不完全列举
 
 ## 使用方法
 使用方法主要针对基础算例流程之外的修改方法
@@ -82,10 +71,16 @@ PINN-Bench/
 ```python
 plot_func_dict = {
   #standard
-  "history_plot": history_plot,       #总损失-迭代数曲线
-  "components_plot": components_plot,  #各个分量的损失-迭代数曲线
+  "history_plot": history_plot, #总损失曲线
+  "components_plot": components_plot, #各分量的损失曲线
+  "l2_error_plot": l2_error_plot, #l2 error曲线
+  "solution_plot": solution_plot, #热力图
+  "solution_slice_plot": solution_slice_plot, #时间切片图
   #ipinn
-  "sigma_plot": sigma_plot #损失函数权重-迭代数曲线
+  "sigma_plot": sigma_plot, #损失函数权重曲线
+  "history_compare_plot": history_compare_plot, #总损失曲线（含对照组）
+  "components_compare_plot": components_compare_plot, #各分量损失曲线（含对照组）
+  "l2_compare_plot": l2_compare_plot #l2 error曲线（含对照组）
 }
 ```
 
@@ -123,10 +118,6 @@ dims: #网络结构，包含输入输出维度、深度和宽度
   width: 70
   out_dim: 1
 
-plots:
-  history_plot: true
-  components_plot: true #是否绘制此图表
-
 (version_name): #与version同名的覆盖节，定义本版本相对std基线的差异（无则省略）
   model:
     model_name: (model_name) #覆盖顶层model.model_name
@@ -142,7 +133,6 @@ plots:
 ```
 
 ## 注意事项
-- 项目理论基础均来自论文[1]，拓展示例来自[2]
 - 配置文件中的初始化名和激活函数名必须严格按照以下字典（来自deepxde和torch的代码）中的名字来设置（否则会读取不出来！）
 ```python
 initializer_dict = {
@@ -167,8 +157,10 @@ activation_dict = {
 - 对于方程输入的x，稳态情况下（如Helmholtz2D），x表示两个空间维度，瞬态情况下（如Heat1D），x表示时间和空间两个维度
 - 测试部分使用`geom.uniform_points()`生成均匀测试点而非`data.test_x`
 - 稳态问题**必须**在配置文件的`data.num_initial`栏目中设置0作为占位
-- 采样时采样数量会补全到二进制整数，可忽略
 - yaml读取到的字典已被工具打包为对象，可以通过调用对象中内容的方式来获取配置信息
+
+## 常见问题（FAQ）
+- `Warning: xxx points required, but xxx points sampled.`采样时采样数量会补全到二进制整数，可忽略
 
 ## 论文引用
 [1] Raissi, M., Perdikaris, P., Karniadakis, G.E., 2019. Physics-informed neural networks: A deep learning framework for solving forward and inverse problems involving nonlinear partial differential equations. Journal of Computational Physics 378, 686–707. https://doi.org/10.1016/j.jcp.2018.10.045

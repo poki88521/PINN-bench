@@ -1,12 +1,13 @@
 from . import StandardTrainer, ImprovedTrainer
 from utils import get_version_config
 
+#绘图类的字典，需要持续维护
 TRAINERS = {
     "StandardTrainer": StandardTrainer,
     "ImprovedTrainer": ImprovedTrainer,
 }
 
-
+#合并版本config与训练器调度
 def launch_trainer(config, example, output_dir):
     # 合并版本覆盖配置：顶层为 std 基线，同名节（如 ipinn:）覆盖后分派
     merged = get_version_config(config)

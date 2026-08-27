@@ -2,6 +2,7 @@ import deepxde as dde
 from models import *
 
 
+#模型调度器
 def create_model(config, data):
     dims_config = config.dims
     model_name = config.model.model_name

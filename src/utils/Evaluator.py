@@ -32,7 +32,9 @@ class Evaluator:
             normalization(self.config, self.example, self.model)
         # 此处必须compile：建立 predict 所需的 outputs
         self.model.compile(self.config.training.optimizer, lr=self.config.training.lr)
-        checkpoint = torch.load(model_path, weights_only=True)
+        # map_location 强制加载到当前设备：支持 GPU 训练/CPU 评估等跨设备场景
+        checkpoint = torch.load(model_path, weights_only=True,
+                                map_location=torch.get_default_device())
         self.model.net.load_state_dict(checkpoint["model_state_dict"])
 
     #获取预测场数据和绝对误差数据
@@ -42,5 +44,18 @@ class Evaluator:
         abs_err = np.abs(u_pred - u_true)
         return x_test, u_pred, u_true, abs_err
         
-
+    #获取按照固定时间顺序获取预测值（时间切片图用）
+    def predict_slice(self, t, n_x=200):
+        #传入非瞬态问题直接报错（稳态问题没有时间切片可分析）
+        if self.example.time_domain is None:
+            raise ValueError("predict_slice requires a time-dependent example")
+        x_min, x_max = self.example.geom.l, self.example.geom.r
+        x = np.linspace(x_min, x_max, n_x).reshape(-1, 1)
+        xt = np.hstack([x, np.full_like(x, t)])
+        u_pred = self.model.predict(xt)
+        if self.example.exact_func is None:
+            u_true = self.example.load_data(xt)
+        else:
+            u_true = self.example.u_exact_numpy(xt)
+        return x.ravel(), u_pred.ravel(), u_true.ravel()
 

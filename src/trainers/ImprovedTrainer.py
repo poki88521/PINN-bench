@@ -1,5 +1,4 @@
-from deepxde import dde
-import numpy as np
+import deepxde as dde
 import time
 import os
 import torch

@@ -1,7 +1,6 @@
 from models import FNN
 from deepxde.nn import initializers
 from torch import nn
-import torchinfo
 import torch
 
 class AttentionNet(FNN):
@@ -31,8 +30,4 @@ class AttentionNet(FNN):
         return self.layers[-1](a)
 
 
-if __name__ == '__main__':
-    #dims = [2] + 5 * [70] + [1]
-    #model_attention = AttentionNet(dims)
-    #torchinfo.summary(model_attention, input_size=(1, 2))
-    ...
+#校验网络结构的主函数已被移除

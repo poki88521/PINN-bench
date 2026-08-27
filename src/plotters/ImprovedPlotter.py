@@ -4,7 +4,8 @@ import numpy as np
 from plotters import StandardPlotter
 from utils import LoaderObject, ImprovedLoader
 
-
+#ipinn版本的绘图器
+#此类中部分图表为对照图，StandardPlotter中不可绘制此类图表（std版本已经为对照组）
 class ImprovedPlotter(StandardPlotter):
     def __init__(self, csv_dir, config, base_name, evaluator, only=None):
         # 对照组 loader：指向同级 control 目录（与 ImprovedTrainer.after_train 的约定一致）

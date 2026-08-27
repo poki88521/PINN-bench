@@ -1,13 +1,13 @@
 from examples import *
 
-
+#类名和类的字典
 CLASSES = {"Heat1D": Heat1D,
            "Helmholtz2D": Helmholtz2D,
            "Wave1D": Wave1D,
            "AllenCahn1D": AllenCahn1D,
            "Burgers1D": Burgers1D}
 
-
+#算例调度器
 def create_example(name, dataset_dir, config):
     #校验算例名称
     if name not in CLASSES:

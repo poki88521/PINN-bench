@@ -40,16 +40,19 @@
 - std 对照训练调度建议放版本 trainer 内部（ImprovedTrainer.launch 末尾），trainer_factory 只做配置合并+分派
 
 ## 待办事项
-- 新图表：
-  - solution_plot（预测 vs 精确解）形式A 场热力图已实现（三子图：预测|精确|绝对误差，StandardPlotter.solution_plot，依赖 Evaluator 重载模型）
-  - 形式B 时间切片曲线：**暂不实现**（用户决定，保留在可选待办）
-  - solution_plot 对照组对比：**暂不实现**（用户决定，solution 不需要和对照组比较，保留在可选待办）
 - readme更新（时间定于ipinn版本基本完成后）
-- 运行脚本目录待修改
+  + 文件超链接？
+  + 非win系统的启动方式
+  + 对照实验说明：ipinn 训练自动跑 std 对照组（control 目录）+ 对比图（history_compare / components_compare / l2_compare）
+  + 脚本说明补全：env.bat 环境引导、脚本可传参（run_std/run_ipinn/plot 的 -n/-v/-o）
+  + 设备说明：代码已自动 cuda/cpu（main.py/plot.py 的 torch.set_default_device），GPU 训练/CPU 评估跨设备（Evaluator 的 map_location）
+  + 新图表提及：solution_plot（热力图，三子图）/ solution_slice_plot（时间切片，5 时刻，非 time-dependent 自动跳过）
+  + -o 参数具体命令行示例（如 scripts\plot.bat -v ipinn -o solution_plot）
+  + examples.md 是否需同步更新（新增图表后）
+- 版本分支
 
 - **可选待办事项**
-  - solution_plot 形式B 时间切片曲线（暂不做，需要时从 scratch/solution_plot_demo.py 参考）
-  - solution_plot 对照组对比（暂不做，用户认为 solution 不需要与对照组比较）
+  - solution_plot 对照组对比（暂不做，solution暂时不需要与对照组比较）
   - solution_plot 可选动画形式（(x,y,t) 类算例逐帧合成）
   - CSV 读写类命名（WriterObject / LoaderObject 体系）可能再调整（等用户通知后统一改）
   - 保存最优模型（可以近似认为最后的模型就是最优模型）
@@ -58,6 +61,9 @@
   - 文件名等代码风格重构（不影响代码使用）
   - 确认数据集存在否则报错（暂不影响使用）
   - 规则1（函数/类前一行注释 ≤3行）全面补全（用户自行按规则补齐）
+  - 增加算例（要重构的内容可能比较多，先不加）
+  - 自定义插值位置（会考虑插值误差的情况，较为复杂，先不加）
+  - 把example_factory的字典优化掉（改成反射获取类名遍历对比）
 
 - **新增发现（本次检查补充）**
   - main.py 创建 example 用的是原始 config，而 trainer_factory 内部分派用 merged 配置：目前 example 参数未被版本覆盖（example 节相同），若未来某版本覆盖 example 节参数会导致训练与评估不一致，需留意

@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 
-
+#所有数据加载器的父类，同时作为std版本的加载器
 class LoaderObject:
     def __init__(self, csv_dir, base_name):
         self.csv_dir = csv_dir
@@ -38,7 +38,7 @@ class LoaderObject:
         log = self._read_csv("l2")
         return log["step"], log["l2_error"]
 
-
+#ipinn版本的加载器
 class ImprovedLoader(LoaderObject):
     def sigma(self, required=False):
         log = self._read_csv("sigma", required=required)

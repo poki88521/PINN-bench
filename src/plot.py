@@ -1,5 +1,6 @@
 import argparse
 import os
+import torch
 import plotters
 from examples import create_example
 from utils import load_yaml, path_init, get_version_config, Evaluator
@@ -16,6 +17,8 @@ def get_args():
 
 if __name__ == "__main__":
     args = get_args()
+    # 设备：有 GPU 用 cuda，否则 cpu（与 main.py 一致，评估重载模型需同设备）
+    torch.set_default_device(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     config_path, csv_dir, DATASET_DIR, base_name = path_init(BASE_DIR, args.name, args.version)
     if not os.path.isfile(config_path):

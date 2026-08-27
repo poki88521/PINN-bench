@@ -5,7 +5,7 @@ import os
 import scipy
 from examples.ExampleObject import ExampleObject
 
-
+#算例具体信息见examples.md
 class Burgers1D(ExampleObject):
     def __init__(self, dataset_dir, example_config):
         super().__init__()

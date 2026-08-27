@@ -2,7 +2,7 @@ import torch
 import deepxde as dde
 from deepxde.nn import activations, initializers
 from torch import nn
-import torchinfo
+
 
 class FNN(dde.nn.pytorch.NN):
     def __init__(self, dims, model_config):
@@ -32,8 +32,4 @@ class FNN(dde.nn.pytorch.NN):
         return self.layers[-1](x)
 
 
-if __name__ == '__main__':
-    #dims = [2] + 5 * [70] + [1]
-    #model = FNN(dims, config)
-    #torchinfo.summary(model, input_size=(1, 2))
-    ...
+#校验网络结构的主函数已被移除
