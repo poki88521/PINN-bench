@@ -41,14 +41,9 @@
 
 ## 待办事项
 - readme更新（时间定于ipinn版本基本完成后）
-  + 文件超链接？
-  + 非win系统的启动方式
-  + 对照实验说明：ipinn 训练自动跑 std 对照组（control 目录）+ 对比图（history_compare / components_compare / l2_compare）
-  + 脚本说明补全：env.bat 环境引导、脚本可传参（run_std/run_ipinn/plot 的 -n/-v/-o）
   + 设备说明：代码已自动 cuda/cpu（main.py/plot.py 的 torch.set_default_device），GPU 训练/CPU 评估跨设备（Evaluator 的 map_location）
   + 新图表提及：solution_plot（热力图，三子图）/ solution_slice_plot（时间切片，5 时刻，非 time-dependent 自动跳过）
   + -o 参数具体命令行示例（如 scripts\plot.bat -v ipinn -o solution_plot）
-  + examples.md 是否需同步更新（新增图表后）
 - 版本分支
 
 - **可选待办事项**
@@ -64,6 +59,7 @@
   - 增加算例（要重构的内容可能比较多，先不加）
   - 自定义插值位置（会考虑插值误差的情况，较为复杂，先不加）
   - 把example_factory的字典优化掉（改成反射获取类名遍历对比）
+  - readme中的非windows系统启动方式
 
 - **新增发现（本次检查补充）**
   - main.py 创建 example 用的是原始 config，而 trainer_factory 内部分派用 merged 配置：目前 example 参数未被版本覆盖（example 节相同），若未来某版本覆盖 example 节参数会导致训练与评估不一致，需留意

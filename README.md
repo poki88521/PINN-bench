@@ -1,11 +1,19 @@
 ## PINN-bench
-- a benchmark that incorporates multiple example for PINN bases on deepXDE and PyTorch
-- 此项目理论基础均来自论文[1]，拓展示例来自[2]
+a benchmark that incorporates multiple example for PINN bases on deepXDE and PyTorch
+#### 此项目理论基础均来自论文[1](#article1)，拓展示例来自论文[2](#article2)
+
+## 目录
+- [功能](#功能)
+- [快速开始](#快速开始windows)
+- [项目结构](#项目结构)
+- [使用方法](#使用方法)
+- [注意事项 & 常见问题（FAQ）](#注意事项--常见问题faq)
+
 
 ## 功能
 1. 训练模型：提供完整模型训练流程
-2. 验证创新方案：提供网络结构、训练流程、损失函数的创新方案拓展接口，且已经包含了基于论文[2]的改进代码示例（详见使用方法）
-3. 多算例集成：包含多个算例（具体内容详见examples.md），可通过.yaml的配置文件来修改超参数
+2. 验证创新方案：提供网络结构、训练流程、损失函数的创新方案拓展接口，且已经包含了基于论文[2](#article2)的改进代码示例,详见[使用方法](#使用方法)
+3. 多算例集成：包含多个算例（具体内容详见[examples.md](examples.md)），可通过YAML文件配置超参数
 4. 自动对照组生成与绘图：包含对照组模型与数据生成方案，可以生成与对照组的对比图
 
 
@@ -49,25 +57,48 @@ PINN-Bench/
 ├── examples.md             # 算例说明
 └── README.md
 ```
-- 本项目中的模型、算例和训练器均已解耦，可以通过factory的方式进行拓展，详情见使用方法
-- 各包内具体内容详见使用方法，此处不完全列举
+- 本项目中的模型、算例和训练器均已解耦，可以通过factory的方式进行拓展，详情见[使用方法](#使用方法)
+- 各包内具体内容详见[使用方法](#使用方法)，此处不完全列举
 
 ## 使用方法
-使用方法主要针对基础算例流程之外的修改方法
-1. 算例
-    - 算例方程中的参数等信息均可通过配置文件来进行修改（暂不支持复杂的边界条件与初始条件通过配置文件直接修改）
-2. 模型
-    - 网络大小可以通过修改配置文件直接修改
-    - 不同种类的模型可以通过在models文件夹额外添加文件来构建，并在model_factory.py文件中添加新的模型实例构建代码
-3. 训练
-    - 训练迭代次数、批量大小等数据均可通过配置文件直接修改（不会再显示于输出中）
-    - 和模型相同，不同类型的训练代码也可自定义文件并在trainer_factory.py中添加对应代码
-    - 有其他需要在训练过程中记录的数据可以写Callback的子类，详见[dde官方文档](https://deepxde.readthedocs.io/en/latest/modules/deepxde.html#module-deepxde.callbacks)
-    - 在monitors.py中可以自定义Monitor，继承TrainMonitor即可
-4. 评估与绘图
-    - 绘图程序默认绘制所选版本的所有图表
-    - 绘图程序也可自定义文件并在plotter_factory.py中添加代码
-    - 通过传入`--only`参数，可以选择绘制哪些图表，但此处的参数必须与方法名**完全一致**，对照字典如下：
+### 0. 关于启动
+- 训练主程序`src/main.py`可接收的命令行参数：
+
+    |长参数|短参数|功能|
+    |---|---|---|
+    |`-n`|`--name`|算例名|
+    |`-v`|`--version`|版本名|
+
+- 绘图主程序`src/plot.py`可接收的命令行参数：
+
+    |长参数|短参数|功能|
+    |---|---|---|
+    |`-n`|`--name`|算例名|
+    |`-v`|`--version`|版本名|
+    |`-o`|`--only`|单独绘图模式|
+
+- 程序通常从`scripts/`中的脚本启动，文件夹中的`env.bat`为环境配置脚本,供其他启动脚本调用
+- 可以自己通过指令启动或运行脚本（自编或已有）启动
+
+### 1. 算例
+算例方程中的参数等信息均可通过配置文件来进行修改（暂不支持复杂的边界条件与初始条件通过配置文件直接修改）
+
+### 2. 模型
+- 网络大小可以通过修改配置文件直接修改
+- 不同种类的模型可以通过在models文件夹额外添加文件来构建，并在model_factory.py文件中添加新的模型实例构建代码
+
+### 3. 训练
+- 训练迭代次数、批量大小等数据均可通过配置文件直接修改（不会再显示于输出中）
+- 和模型相同，不同类型的训练代码也可自定义文件并在trainer_factory.py中添加对应代码
+- 有其他需要在训练过程中记录的数据可以写Callback的子类Monitor，详见[dde官方文档](https://deepxde.readthedocs.io/en/latest/modules/deepxde.html#module-deepxde.callbacks)
+- 在monitors.py中可以自定义Monitor，继承TrainMonitor即可
+- 非std版本的项目可以生成基于std版本的对照组数据（重写`after_train`方法即可）
+- 数据输入输出依赖`utils/csv_loader.py`和`utils/csv_writer.py`中的加载器和读取器类
+
+### 4. 评估与绘图
+- 评估依赖`utils/Evaluator.py`中的评估器类（重新加载模型文件并运行测试）
+- 绘图程序也可自定义文件并在plotter_factory.py中添加代码
+- `--only`参数默认为绘制所有图表，填入方法名时可以选择绘制哪些图表。此处的名称**必须**严格按照以下字典来写：
 ```python
 plot_func_dict = {
   #standard
@@ -84,7 +115,9 @@ plot_func_dict = {
 }
 ```
 
-5. 配置文件模板
+### 5. 配置文件
+- 配置文件的格式为std版本全部内容+版本节（包含修改的与添加的参数）。使用配置时会整合为修改后的完整配置（不包含版本节）
+- 以下为配置文件模板与各个部分的注释
 ```yaml
 version: (version_name) #版本名，需与configs下的子目录名一致
 
@@ -127,12 +160,7 @@ dims: #网络结构，包含输入输出维度、深度和宽度
     lr_decay_gamma: 0.9
   gamma: 1000.0 #版本专属参数（如ipinn的AW权重）
   n_samples: 100000
-
-# 运行时：get_version_config(config) 将顶层与(version_name)节递归合并，
-# 得到本版本有效配置；std对照直接使用顶层配置
 ```
-
-## 注意事项
 - 配置文件中的初始化名和激活函数名必须严格按照以下字典（来自deepxde和torch的代码）中的名字来设置（否则会读取不出来！）
 ```python
 initializer_dict = {
@@ -154,16 +182,18 @@ activation_dict = {
 "tanh": bkd.tanh,
 }
 ```
+
+## 注意事项 & 常见问题（FAQ）
 - 对于方程输入的x，稳态情况下（如Helmholtz2D），x表示两个空间维度，瞬态情况下（如Heat1D），x表示时间和空间两个维度
 - 测试部分使用`geom.uniform_points()`生成均匀测试点而非`data.test_x`
 - 稳态问题**必须**在配置文件的`data.num_initial`栏目中设置0作为占位
 - yaml读取到的字典已被工具打包为对象，可以通过调用对象中内容的方式来获取配置信息
-
-## 常见问题（FAQ）
 - `Warning: xxx points required, but xxx points sampled.`采样时采样数量会补全到二进制整数，可忽略
 
 ## 论文引用
+<a id="article1"></a>
 [1] Raissi, M., Perdikaris, P., Karniadakis, G.E., 2019. Physics-informed neural networks: A deep learning framework for solving forward and inverse problems involving nonlinear partial differential equations. Journal of Computational Physics 378, 686–707. https://doi.org/10.1016/j.jcp.2018.10.045
+<a id="article2"></a>
 [2] Niu, P., Guo, J., Chen, Y., Zhou, Y., Feng, M., Shi, Y., 2025. Improved physics-informed neural network in mitigating gradient-related failures. Neurocomputing 638, 130167. https://doi.org/10.1016/j.neucom.2025.130167
 
 
