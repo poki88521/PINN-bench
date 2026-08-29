@@ -7,12 +7,12 @@ from utils import LoaderObject, ImprovedLoader
 #ipinn版本的绘图器
 #此类中部分图表为对照图，StandardPlotter中不可绘制此类图表（std版本已经为对照组）
 class ImprovedPlotter(StandardPlotter):
-    def __init__(self, csv_dir, config, base_name, evaluator, only=None):
-        # 对照组 loader：指向同级 control 目录（与 ImprovedTrainer.after_train 的约定一致）
-        control_dir = os.path.join(csv_dir, "control")
+    def __init__(self, output_dir, config, base_name, evaluator, only=None):
+        # 对照组 loader：指向 control/csv 目录（与 ImprovedTrainer.after_train 的约定一致）
+        control_dir = os.path.join(output_dir, "control", "csv")
         control_base = f"{config.example.name}_control"
         self.loader_c = LoaderObject(control_dir, control_base)
-        super().__init__(csv_dir, config, base_name, evaluator, only)
+        super().__init__(output_dir, config, base_name, evaluator, only)
 
     def get_loader(self):
         return ImprovedLoader(self.csv_dir, self.base_name)
@@ -31,7 +31,7 @@ class ImprovedPlotter(StandardPlotter):
             ax.set_ylabel(name)
             ax.legend()
         fig.tight_layout()
-        out_path = os.path.join(self.csv_dir,
+        out_path = os.path.join(self.output_dir,
                                 f"{self.config.example.name}_{self.config.version}_sigma.png")
         fig.savefig(out_path)
         plt.close(fig)
@@ -56,7 +56,7 @@ class ImprovedPlotter(StandardPlotter):
         ax.set_xlabel("Iteration")
         ax.set_ylabel("Loss")
         ax.legend()
-        out_path = os.path.join(self.csv_dir,
+        out_path = os.path.join(self.output_dir,
                                 f"{self.config.example.name}_{self.config.version}_history_compare.png")
         fig.savefig(out_path)
         plt.close(fig)
@@ -88,7 +88,7 @@ class ImprovedPlotter(StandardPlotter):
             ax.set_title(name)
             ax.legend()
         fig.tight_layout()
-        out_path = os.path.join(self.csv_dir,
+        out_path = os.path.join(self.output_dir,
                                 f"{self.config.example.name}_{self.config.version}_components_compare.png")
         fig.savefig(out_path)
         plt.close(fig)
@@ -111,7 +111,7 @@ class ImprovedPlotter(StandardPlotter):
         ax.set_xlabel("step")
         ax.set_ylabel("L2 error")
         ax.legend()
-        out_path = os.path.join(self.csv_dir,
+        out_path = os.path.join(self.output_dir,
                                 f"{self.config.example.name}_{self.config.version}_l2_compare.png")
         fig.savefig(out_path)
         plt.close(fig)

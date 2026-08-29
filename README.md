@@ -191,6 +191,7 @@ activation_dict = {
 - 稳态问题**必须**在配置文件的`data.num_initial`栏目中设置0作为占位
 - yaml读取到的字典已被工具打包为对象，可以通过调用对象中内容的方式来获取配置信息
 - `Warning: xxx points required, but xxx points sampled.`采样时采样数量会补全到二进制整数，可忽略
+- 非std版本对照组的生成接入在版本模型训练后，其中涉及基础版本模型的训练，请注意用时
 
 ## 论文引用
 <a id="article1"></a>

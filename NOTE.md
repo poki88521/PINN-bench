@@ -40,6 +40,8 @@
 - std 对照训练调度建议放版本 trainer 内部（ImprovedTrainer.launch 末尾），trainer_factory 只做配置合并+分派
 
 ## 待办事项
+- csv单独开分目录
+- trainer的调度重复？（config的和factory）
 
 - **可选待办事项**
   - solution_plot 对照组对比（暂不做，solution暂时不需要与对照组比较）
@@ -56,6 +58,7 @@
   - 把example_factory的字典优化掉（改成反射获取类名遍历对比）
   - readme中的非windows系统启动方式
   - 把训练时间写入info表格
+  - dataset文件夹加gitignore（暂时数据集不大，不忽略）
 
 - **新增发现（本次检查补充）**
   - main.py 创建 example 用的是原始 config，而 trainer_factory 内部分派用 merged 配置：目前 example 参数未被版本覆盖（example 节相同），若未来某版本覆盖 example 节参数会导致训练与评估不一致，需留意

@@ -20,7 +20,7 @@ class ImprovedTrainer(TrainerObject):
         return ImprovedMonitor(self.example, self.config, self.sigmas, self.sigma_names)
 
     def make_writer(self):
-        return ImprovedWriter(self.output_dir, self.base_name, self.monitor)
+        return ImprovedWriter(self.csv_dir, self.base_name, self.monitor)
 
     def train(self, training_config):
         ipinn_config = self.config.ipinn

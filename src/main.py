@@ -15,12 +15,16 @@ def get_args():
                         help="name of version")
     return parser.parse_args()
 
+def print_info(args):
+    print(f"example name: {args.name}")
+    print(f"version: {args.version}")
+    print(f"device: {torch.get_default_device()}")
 
 if __name__ == '__main__':
     args = get_args()
     # 设备：有 GPU 用 cuda，否则 cpu（写死，笔记本/台式机通用）
     torch.set_default_device(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
-    print(f"device: {torch.get_default_device()}")
+    print_info(args)
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     config_path, output_dir, DATASET_DIR, base_name = path_init(BASE_DIR, args.name, args.version)
     if not os.path.isfile(config_path):

@@ -22,12 +22,11 @@ ENV/
 .obsidian/
 
 # Logs and databases
+*.csv
 *.log
 *.sqlite3
 runs/*
 !runs/.gitkeep
-dataset/*
-!dataset/.gitkeep
 
 # Local .env file
 .env

@@ -6,8 +6,11 @@ from utils import LoaderObject, Evaluator
 #std版本的绘图类，同时是所有绘图类的父类
 #此类中的图是各种版本必须绘制的图
 class StandardPlotter:
-    def __init__(self, csv_dir, config, base_name, evaluator, only=None):
-        self.csv_dir = csv_dir
+    def __init__(self, output_dir, config, base_name, evaluator, only=None):
+        #版本根目录（png输出到此）
+        self.output_dir = output_dir
+        #csv目录（csv输出到此）
+        self.csv_dir = os.path.join(output_dir, "csv")
         self.config = config
         self.base_name = base_name
         #重运行模型的评估类实例
@@ -52,7 +55,7 @@ class StandardPlotter:
         ax.set_xlabel("Iteration")
         ax.set_ylabel("Loss")
         ax.legend()
-        out_path = os.path.join(self.csv_dir,
+        out_path = os.path.join(self.output_dir,
                                 f"{self.config.example.name}_{self.config.version}_history.png")
         fig.savefig(out_path)
         plt.close(fig)
@@ -74,7 +77,7 @@ class StandardPlotter:
             ax.set_title(name)
             ax.legend()
         fig.tight_layout()
-        out_path = os.path.join(self.csv_dir,
+        out_path = os.path.join(self.output_dir,
                                 f"{self.config.example.name}_{self.config.version}_components.png")
         fig.savefig(out_path)
         plt.close(fig)
@@ -90,7 +93,7 @@ class StandardPlotter:
         ax.set_xlabel("step")
         ax.set_ylabel("L2 error")
         ax.legend()
-        out_path = os.path.join(self.csv_dir,
+        out_path = os.path.join(self.output_dir,
                                 f"{self.config.example.name}_{self.config.version}_l2.png")
         fig.savefig(out_path)
         plt.close(fig)
@@ -124,7 +127,7 @@ class StandardPlotter:
             fig.colorbar(im, ax=ax)
         fig.suptitle(f"Solution: {self.config.example.name}")
         fig.tight_layout()
-        out_path = os.path.join(self.csv_dir, f"{self.base_name}_solution.png")
+        out_path = os.path.join(self.output_dir, f"{self.base_name}_solution.png")
         fig.savefig(out_path)
         plt.close(fig)
         print(f"saved: {out_path}")
@@ -149,7 +152,7 @@ class StandardPlotter:
         axes[0].set_ylabel("u")
         fig.suptitle(f"Solution slices: {self.config.example.name}")
         fig.tight_layout()
-        out_path = os.path.join(self.csv_dir, f"{self.base_name}_solution_slice.png")
+        out_path = os.path.join(self.output_dir, f"{self.base_name}_solution_slice.png")
         fig.savefig(out_path)
         plt.close(fig)
         print(f"saved: {out_path}")

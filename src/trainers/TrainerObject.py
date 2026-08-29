@@ -15,6 +15,8 @@ class TrainerObject:
         self.base_config = base_config if base_config is not None else config
         self.example = example
         self.output_dir = output_dir
+        self.csv_dir = os.path.join(output_dir, "csv")
+        os.makedirs(self.csv_dir, exist_ok=True)
         self.base_name = base_name
         self.monitor = None
         self.writer = None
@@ -45,7 +47,7 @@ class TrainerObject:
 
     #获取写入器钩子，可重写
     def make_writer(self):
-        return WriterObject(self.output_dir, self.base_name, self.monitor)
+        return WriterObject(self.csv_dir, self.base_name, self.monitor)
 
     #训练后处理钩子，可重写
     def after_train(self, loss_history, train_state, model):

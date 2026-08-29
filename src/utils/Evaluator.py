@@ -13,7 +13,7 @@ class Evaluator:
         self.base_name = base_name
         self.output_dir = output_dir
         self.model = None
-        self.loader = LoaderObject(output_dir, base_name)
+        self.loader = LoaderObject(os.path.join(output_dir, "csv"), base_name)
         self.load_model()
 
     #加载模型格式与权重
