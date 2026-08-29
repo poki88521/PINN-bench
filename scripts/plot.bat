@@ -6,5 +6,6 @@ rem examples:
 rem   scripts\plot.bat
 rem   scripts\plot.bat -v ipinn
 rem   scripts\plot.bat -v ipinn -o solution_plot history_compare_plot
-call scripts\env.bat
-%PYTHON% src\plot.py -n Helmholtz2D -v standard %*
+call "%~dp0env.bat"
+%PYTHON% "%PROJECT_ROOT%\src\plot.py" -n Helmholtz2D -v standard %*
+pause
