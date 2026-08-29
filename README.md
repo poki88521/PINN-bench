@@ -94,6 +94,7 @@ PINN-Bench/
 - 在monitors.py中可以自定义Monitor，继承TrainMonitor即可
 - 非std版本的项目可以生成基于std版本的对照组数据（重写`after_train`方法即可）
 - 数据输入输出依赖`utils/csv_loader.py`和`utils/csv_writer.py`中的加载器和读取器类
+- 训练参数默认为`iterations=100`和`display_every=10`仅供流程测试用，可按需修改
 
 ### 4. 评估与绘图
 - 评估依赖`utils/Evaluator.py`中的评估器类（重新加载模型文件并运行测试）
@@ -184,6 +185,7 @@ activation_dict = {
 ```
 
 ## 注意事项 & 常见问题（FAQ）
+- `scripts\env.bat`里的python环境是默认的，运行时请务必更改为自己使用的环境所在的路径
 - 对于方程输入的x，稳态情况下（如Helmholtz2D），x表示两个空间维度，瞬态情况下（如Heat1D），x表示时间和空间两个维度
 - 测试部分使用`geom.uniform_points()`生成均匀测试点而非`data.test_x`
 - 稳态问题**必须**在配置文件的`data.num_initial`栏目中设置0作为占位
