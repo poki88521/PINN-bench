@@ -24,7 +24,10 @@ ENV/
 # Logs and databases
 *.log
 *.sqlite3
-dataset/
+runs/*
+!runs/.gitkeep
+dataset/*
+!dataset/.gitkeep
 
 # Local .env file
 .env
