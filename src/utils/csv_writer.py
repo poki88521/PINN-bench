@@ -85,3 +85,13 @@ class ImprovedWriter(WriterObject):
                           for name in self.monitor.sigma_names]
                 for i, step in enumerate(self.monitor.sigma_steps)]
         self._write_rows("sigma", header, rows)
+
+
+class ScaleWriter(WriterObject):
+    #信息表（在 std/ipinn 口径上追加训练耗时）
+    def info(self, train_state):
+        header = ["best_step", "best_loss_train", "best_loss_test", "training_time_s"]
+        rows = [[train_state.best_step, train_state.best_loss_train,
+                 train_state.best_loss_test,
+                 getattr(train_state, "training_time", float("nan"))]]
+        self._write_rows("info", header, rows)

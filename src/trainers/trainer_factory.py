@@ -1,10 +1,11 @@
-from . import StandardTrainer, ImprovedTrainer
+from . import StandardTrainer, ImprovedTrainer, ScaleTrainer
 from utils import get_version_config
 
 #绘图类的字典，需要持续维护
 TRAINERS = {
     "StandardTrainer": StandardTrainer,
     "ImprovedTrainer": ImprovedTrainer,
+    "ScaleTrainer": ScaleTrainer
 }
 
 #合并版本config与训练器调度

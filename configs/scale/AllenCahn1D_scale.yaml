@@ -1,0 +1,59 @@
+version: "scale"
+
+#顶层为 std 基线（仅作占位，实际调度由下方同名覆盖节决定）
+example:
+  name: "AllenCahn1D"
+  d: 0.001
+
+model:
+  model_name: "FNN"
+  activation: "tanh"
+  init: "Glorot normal"
+
+training:
+  trainer_name: "StandardTrainer"
+  optimizer: "adam"
+  lr: 0.001
+  iterations: 100
+  batch_size: 128
+  display_every: 10
+
+data:
+  num_domain: 10000
+  num_boundary: 1000
+  num_initial: 500
+  num_test: 1000
+
+dims:
+  in_dim: 2
+  depth: 5
+  width: 70
+  out_dim: 1
+
+#与 version 同名的覆盖节：合并后生效（沿用 ipinn 的分层约定）
+scale:
+  model:
+    model_name: "ScalePINN"
+    activation: "sin + silu（写死，此处仅记录）"
+    init: "He uniform"
+  training:
+    trainer_name: "ScaleTrainer"
+    lr: 0.002
+    iterations: 40000
+    display_every: 100
+  #序贯修正超参：ER=τ_sc、ER_xx=τ_α、γ 取算例物理系数 d（论文 AC 取值）
+  ER: 0.45
+  ER_xx: 1.5
+  weight_ic: 100
+  weight_bc: 100
+  #每步采样数（不是总点数）：内点 / 初始点 / 边界点（左右各半）
+  batch_domain: 1000
+  batch_initial: 50
+  batch_boundary: 50
+  #随机种子（固定后同配置可复现；官方 AC 用 5 个种子取均值，此处单种子）
+  seed: 0
+  #学习率调度：cosine 为官方 optax 余弦衰减；decay_steps 远大于 iterations 时近似恒定
+  lr_schedule: "cosine"
+  lr_end: 1.0e-10
+  lr_exponent: 1.2
+  lr_decay_steps: 500000
