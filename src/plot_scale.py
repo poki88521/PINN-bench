@@ -24,6 +24,8 @@ def get_args():
     parser.add_argument("-v", "--version", default="scale", help="name of version")
     parser.add_argument("--ipinn_dir", default=IPINN_DIR,
                         help="ipinn 历史结果目录，缺失则跳过对比曲线")
+    parser.add_argument("--tag", default=None,
+                        help="与 main_scale.py 相同的运行标记（读 runs/<name>/<version>/<tag>/）")
     return parser.parse_args()
 
 
@@ -138,6 +140,10 @@ if __name__ == "__main__":
         raise FileNotFoundError(f"Config not found: {config_path}")
     config = load_yaml(config_path)
     merged = get_version_config(config)
+    #运行标记：与 main_scale.py 保持一致（只改读取路径，不建目录）
+    if args.tag:
+        output_dir = os.path.join(output_dir, args.tag)
+        base_name = f"{base_name}_{args.tag}"
     print(f"example name: {args.name}")
     print(f"version: {args.version}")
     print(f"device: {torch.get_default_device()}")

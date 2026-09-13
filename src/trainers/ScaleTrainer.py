@@ -1,3 +1,4 @@
+import copy
 import os
 import time
 
@@ -113,6 +114,11 @@ class ScaleTrainer:
         u_xx = forward_dict["u_xx"]
         return u_t - self.config.example.d * u_xx - 5 * (u - u ** 3)
 
+    #是否启用序贯修正：ER>0 才加修正项
+    #ER=0 即官方 notebook 里的 ref 对照组（官方为 if (ER > 0) 才加），同时避开除零
+    def use_correction(self):
+        return float(self.config.scale.ER) > 0.0
+
     #序贯修正项：(u_k-u_{k-1})/ER - γ*(u_xx_k-u_xx_{k-1})/ER_xx
     #γ 取物理扩散系数 d；ER/ER_xx 对应论文的 τ_sc/τ_α
     def correction(self, cur, u_pre, u_xx_pre):
@@ -131,7 +137,10 @@ class ScaleTrainer:
     #分量已乘权重，求和即总损失（与 ipinn 的 csv 记录口径一致）
     def loss_components(self, cur, u_pre, u_xx_pre, Y, batch):
         sc = self.config.scale
-        residual = self.pde(cur) + self.correction(cur, u_pre, u_xx_pre)
+        residual = self.pde(cur)
+        #ER=0 时跳过序贯修正项（u_pre/u_xx_pre 不参与计算）
+        if self.use_correction():
+            residual = residual + self.correction(cur, u_pre, u_xx_pre)
         u = cur["u"]
         return [self.masked_mean(residual ** 2, batch["m_in"]),
                 sc.weight_bc * self.masked_mean((u - Y) ** 2, batch["m_bc_l"]),
@@ -167,6 +176,19 @@ class ScaleTrainer:
                     "optimizer_state_dict": optimizer.state_dict()}, path)
         print(f"saved model: {path}")
 
+    #保存最优权重（best 以训练损失判定，快照来自训练过程中抓到的最好一步）
+    #存档只含权重与对应的 step/损失，不含 optimizer（不同步的优化器状态会误导续训）
+    def save_best_model(self, best_state):
+        if best_state["model_state_dict"] is None:
+            return None
+        path = os.path.join(self.output_dir, f"{self.base_name}_best.pt")
+        torch.save({"model_state_dict": best_state["model_state_dict"],
+                    "step": best_state["step"],
+                    "best_loss_train": best_state["best_loss_train"],
+                    "best_loss_test": best_state["best_loss_test"]}, path)
+        print(f"saved best model: {path} (step {best_state['step']})")
+        return path
+
     def train(self, training_config):
         sc = self.config.scale
         iterations = int(training_config.iterations)
@@ -193,23 +215,46 @@ class ScaleTrainer:
         loss_history = dde.model.LossHistory()
         train_state = dde.model.TrainState()
         bs_in, bs_ic, bs_bc = sc.batch_domain, sc.batch_initial, sc.batch_boundary
+        #best 权重快照（只在内存里留一份，训练结束再落盘，避免循环里频繁写盘）
+        best_state = {"model_state_dict": None, "step": None,
+                      "best_loss_train": None, "best_loss_test": None}
 
-        #记录一步：训练分量 + 全池测试分量 + l2 误差
+        print(f"training: iterations={iterations}, display_every={display_every}, "
+              f"lr={float(training_config.lr):.3e}, seed={seed}")
+        print(f"scale: ER={float(sc.ER)}, ER_xx={float(sc.ER_xx)}, "
+              f"batch(domain/initial/boundary)="
+              f"{bs_in}/{bs_ic}/{bs_bc}, gamma=d={float(self.config.example.d)}")
+        #控制台打印用英文，避免重定向到 GBK 日志时中文乱码
+        print("correction: disabled (ER<=0, official ref control)" if not self.use_correction()
+              else f"correction: enabled (ER={float(sc.ER)}, ER_xx={float(sc.ER_xx)})")
+
+        #记录一步：训练分量 + 全池测试分量 + l2 误差（并打印一行进度）
         def record(step, train_comps):
             train_comps = [float(c.detach()) for c in train_comps]
             test_comps = self.eval_loss_components(model, model_pre)
             #l2 与 ipinn 使用同一测试网格，便于横向对比
             u_pred = model.predict_u(self.monitor.x_test_tensor)
             self.monitor.update(step, u_pred.cpu().numpy())
+            l2_now = self.monitor.l2_errors[-1]
             loss_history.append(step, np.array(train_comps), np.array(test_comps),
-                                np.array([self.monitor.l2_errors[-1]]))
+                                np.array([l2_now]))
             total_train, total_test = sum(train_comps), sum(test_comps)
             if total_train < train_state.best_loss_train:
                 train_state.best_step = step
                 train_state.best_loss_train = total_train
                 train_state.best_loss_test = total_test
+                #此刻的权重正对应上面记录的损失，直接留快照
+                best_state["model_state_dict"] = copy.deepcopy(model.state_dict())
+                best_state["step"] = step
+                best_state["best_loss_train"] = total_train
+                best_state["best_loss_test"] = total_test
+            print(f"[{step:>7d}/{iterations}] train {total_train:.4e}  "
+                  f"test {total_test:.4e}  l2 {l2_now:.4e}  "
+                  f"best {train_state.best_loss_train:.4e}@{train_state.best_step}  "
+                  f"elapsed {time.time() - time_start:.1f}s")
 
         time_start = time.time()
+        print(f"start training on {torch.get_default_device()} ...")
         step = 0
         while True:
             batch = self.get_batch(self.pool, bs_in, bs_ic, bs_bc)
@@ -236,6 +281,11 @@ class ScaleTrainer:
 
         time_elapsed = time.time() - time_start
         train_state.training_time = time_elapsed
-        print(f"elapsed time: {time_elapsed:.2f}s")
+        print(f"elapsed time: {time_elapsed:.2f}s "
+              f"({time_elapsed / max(iterations, 1) * 1000:.2f} ms/step)")
+        print(f"best: step {train_state.best_step}, "
+              f"train {train_state.best_loss_train:.6e}, "
+              f"test {train_state.best_loss_test:.6e}")
         self.save_model(model, optimizer, iterations)
+        self.save_best_model(best_state)
         return loss_history, train_state

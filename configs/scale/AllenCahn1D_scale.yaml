@@ -52,8 +52,9 @@ scale:
   batch_boundary: 50
   #随机种子（固定后同配置可复现；官方 AC 用 5 个种子取均值，此处单种子）
   seed: 0
-  #学习率调度：cosine 为官方 optax 余弦衰减；decay_steps 远大于 iterations 时近似恒定
+  #学习率调度：cosine 为官方 optax 余弦衰减（官方语义 decay_steps = max_iter，须与 iterations 同步）
   lr_schedule: "cosine"
   lr_end: 1.0e-10
   lr_exponent: 1.2
-  lr_decay_steps: 500000
+  #必须与 training.iterations 一致；若改了轮数（如 80000）这里要同步改，否则 lr 不衰减
+  lr_decay_steps: 40000

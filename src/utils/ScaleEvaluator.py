@@ -22,8 +22,12 @@ class ScaleEvaluator:
         self.model = None
         self.model_path = None
 
-    #选取存档：优先配置指定的迭代步，否则取 step 最大的一个
-    def resolve_model_path(self):
+    #选取存档：优先 best，其次配置指定的迭代步，最后取 step 最大的一个
+    def resolve_model_path(self, prefer_best=True):
+        if prefer_best:
+            best = os.path.join(self.output_dir, f"{self.base_name}_best.pt")
+            if os.path.isfile(best):
+                return best
         want = os.path.join(self.output_dir,
                             f"{self.base_name}_model-{self.config.training.iterations}.pt")
         if os.path.isfile(want):
@@ -39,9 +43,9 @@ class ScaleEvaluator:
 
         return max(candidates, key=step_of)
 
-    #加载模型与权重
-    def load_model(self):
-        path = self.resolve_model_path()
+    #加载模型与权重（prefer_best=True 时优先读 best 存档）
+    def load_model(self, prefer_best=True):
+        path = self.resolve_model_path(prefer_best=prefer_best)
         model = ScaleModel.ScaleNet(self.dims, self.config.model)
         checkpoint = torch.load(path, weights_only=True,
                                 map_location=torch.get_default_device())
@@ -49,7 +53,9 @@ class ScaleEvaluator:
         model.eval()
         self.model = model
         self.model_path = path
-        print(f"loaded model: {path}")
+        step = checkpoint.get("step", None)
+        note = f" (best_step={step})" if step is not None else ""
+        print(f"loaded model: {path}{note}")
         return path
 
     #批量预测 u（分块，避免一次性占用过多内存）

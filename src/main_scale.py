@@ -18,7 +18,21 @@ def get_args():
                         help="覆盖配置里的记录间隔（冒烟测试用，默认读配置）")
     parser.add_argument("--seed", type=int, default=None,
                         help="覆盖配置里的随机种子（默认读配置）")
+    parser.add_argument("--ER", type=float, default=None,
+                        help="覆盖配置里的 ER；置 0 即官方 ER=0 对照组（关闭序贯修正）")
+    parser.add_argument("--tag", default=None,
+                        help="运行标记：产物落到 runs/<name>/<version>/<tag>/，"
+                             "文件名加 _<tag> 后缀（避免 ER=0、多种子运行互相覆盖）")
     return parser.parse_args()
+
+
+#运行标记：把本次运行的产物隔离到子目录，并同步修改文件名前缀
+def apply_tag(output_dir, base_name, tag):
+    if not tag:
+        return output_dir, base_name
+    output_dir = os.path.join(output_dir, tag)
+    os.makedirs(output_dir, exist_ok=True)
+    return output_dir, f"{base_name}_{tag}"
 
 
 if __name__ == '__main__':
@@ -38,6 +52,10 @@ if __name__ == '__main__':
         merged.training.display_every = args.display_every
     if args.seed is not None:
         merged.scale.seed = args.seed
+    if args.ER is not None:
+        merged.scale.ER = args.ER
+    #运行标记：隔离本次运行的产物目录与文件名
+    output_dir, base_name = apply_tag(output_dir, base_name, args.tag)
     print(f"example name: {args.name}")
     print(f"version: {args.version}")
     print(f"device: {torch.get_default_device()}")
