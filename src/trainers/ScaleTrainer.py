@@ -51,8 +51,28 @@ class ScaleTrainer:
     def save(self, loss_history, train_state, training_config):
         self.writer.history(loss_history, training_config)
         self.writer.components(loss_history, self.example)
-        self.writer.info(train_state)
+        self.writer.info(train_state, self.experiment_info(training_config))
         self.writer.l2_error()
+
+    #本次实验的超参快照：作为附加列写进 info.csv，使每组产物自描述
+    def experiment_info(self, training_config):
+        sc = self.config.scale
+        return {"seed": int(getattr(sc, "seed", 0)),
+                "ER": float(sc.ER),
+                "ER_xx": float(sc.ER_xx),
+                "correction": int(self.use_correction()),
+                "iterations": int(training_config.iterations),
+                "display_every": int(training_config.display_every),
+                "lr": float(training_config.lr),
+                "lr_schedule": str(getattr(sc, "lr_schedule", "cosine")),
+                "lr_decay_steps": int(training_config.iterations),
+                "lr_end": float(sc.lr_end),
+                "lr_exponent": float(sc.lr_exponent),
+                "weight_ic": float(sc.weight_ic),
+                "weight_bc": float(sc.weight_bc),
+                "batch_domain": int(sc.batch_domain),
+                "batch_initial": int(sc.batch_initial),
+                "batch_boundary": int(sc.batch_boundary)}
 
     #获取训练点池：复用算例数据集的参考解网格
     #列序：[x, t]；给出四个分量的索引与掩码（列掩码用于全池测试损失）
@@ -157,14 +177,15 @@ class ScaleTrainer:
                                      pool["Y"], pool)
         return [float(c.detach()) for c in comps]
 
-    #学习率调度：cosine 为 optax 余弦衰减（warmup=0 时等价于官方设置），其余为恒定
+    #学习率调度：cosine 为 optax 余弦衰减（warmup=0、decay_steps 取 iterations，即官方的 decay_steps=max_iter）
     #返回值务必是 Python float：numpy 标量写进 optimizer 会污染存档（weights_only 加载失败）
     def lr_at(self, step, training_config):
         peak = float(training_config.lr)
         sc = self.config.scale
         if getattr(sc, "lr_schedule", "cosine") != "cosine":
             return peak
-        decay_steps = max(int(sc.lr_decay_steps), 1)
+        #decay_steps 跟随本次运行的最大迭代数，避免与 iterations 脱节
+        decay_steps = max(int(training_config.iterations), 1)
         alpha = float(sc.lr_end) / peak if peak > 0 else 0.0
         cosine = 0.5 * (1.0 + float(np.cos(np.pi * min(step, decay_steps) / decay_steps)))
         return float(peak * ((1.0 - alpha) * cosine ** float(sc.lr_exponent) + alpha))

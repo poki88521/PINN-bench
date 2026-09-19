@@ -88,10 +88,13 @@ class ImprovedWriter(WriterObject):
 
 
 class ScaleWriter(WriterObject):
-    #信息表（在 std/ipinn 口径上追加训练耗时）
-    def info(self, train_state):
-        header = ["best_step", "best_loss_train", "best_loss_test", "training_time_s"]
+    #信息表（在 std/ipinn 口径上追加训练耗时；extra 为本次实验的超参快照，按插入顺序追加为列）
+    def info(self, train_state, extra=None):
+        extra = extra if extra is not None else {}
+        header = (["best_step", "best_loss_train", "best_loss_test", "training_time_s"]
+                  + list(extra.keys()))
         rows = [[train_state.best_step, train_state.best_loss_train,
                  train_state.best_loss_test,
-                 getattr(train_state, "training_time", float("nan"))]]
+                 getattr(train_state, "training_time", float("nan"))]
+                + list(extra.values())]
         self._write_rows("info", header, rows)
